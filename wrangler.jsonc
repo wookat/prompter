@@ -10,7 +10,7 @@
   },
   "kv_namespaces": [
     // Anonymous usage counters (page views / prompter starts). No PII.
-    { "binding": "KV", "id": "REPLACE_KV_ID" }
+    { "binding": "KV", "id": "55d76149296445cebc18a420e6adc200" }
   ],
   "observability": {
     "enabled": true

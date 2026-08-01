@@ -70,9 +70,9 @@ function pageHtml(u) {
 const urls = ['/', ...USE_CASES.map((u) => u.path)]
 
 for (const u of USE_CASES) {
-  const dir = path.join(OUT_DIR, u.path.replace(/^\//, ''))
-  mkdirSync(dir, { recursive: true })
-  writeFileSync(path.join(dir, 'index.html'), pageHtml(u))
+  // Emit "<route>.html" (not "<route>/index.html") so Workers assets serve
+  // the exact path with 200 instead of a trailing-slash redirect.
+  writeFileSync(path.join(OUT_DIR, `${u.path.replace(/^\//, '')}.html`), pageHtml(u))
 }
 
 const today = new Date().toISOString().slice(0, 10)
