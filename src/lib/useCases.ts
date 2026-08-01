@@ -1,0 +1,164 @@
+export interface UseCase {
+  slug: string
+  path: string
+  name: string
+  title: string
+  description: string
+  h1: string
+  intro: string
+  bullets: string[]
+  tip: string
+}
+
+export const SITE = 'https://prompter.zalize.com'
+
+export const USE_CASES: UseCase[] = [
+  {
+    slug: 'wedding-speech',
+    path: '/teleprompter-for-wedding-speech',
+    name: 'Wedding Speeches & Toasts',
+    title: 'Free Teleprompter for Wedding Speeches & Toasts | PromptCue',
+    description:
+      'Deliver your wedding speech or toast with confidence. Free online teleprompter — paste your speech, set a comfortable pace, and practice until it flows. No signup.',
+    h1: 'Read your wedding speech with confidence',
+    intro:
+      'A wedding speech is one of the few talks most people ever give in front of a crowd — and nerves make it easy to lose your place. Put your speech on a slow, steady scroll: rehearse the pacing at home, then use your phone as a discreet prompt on the day. Large readable text, one tap to pause when the room laughs.',
+    bullets: [
+      'Practice with a countdown and a steady pace so the speech lands at the right length',
+      'Tap anywhere to pause while the room reacts, tap again to continue',
+      'Big adjustable font readable from a phone held at podium distance',
+      'Your speech stays on your device — nothing is uploaded',
+    ],
+    tip: 'Still writing the speech? Our sister tool SpeakEasy drafts a personal wedding speech from your real stories: https://speech.zalize.com',
+  },
+  {
+    slug: 'presentation',
+    path: '/teleprompter-for-presentations',
+    name: 'Presentations & Talks',
+    title: 'Free Teleprompter for Presentations & Keynotes | PromptCue',
+    description:
+      'Keep your presentation on track with a free browser teleprompter. Scroll your talk track next to your slides — adjustable speed, keyboard control, no signup.',
+    h1: 'Stay on script during presentations and keynotes',
+    intro:
+      'Great presenters rehearse a talk track, then panic-forget it in the room. Run PromptCue on a second screen, tablet or phone below your eye line: your speaker notes scroll at your pace while you keep eye contact with the audience. Space pauses, arrows fine-tune speed without breaking stride.',
+    bullets: [
+      'Runs alongside your slides on a second monitor, tablet or phone',
+      'Keyboard shortcuts let you speed up or slow down mid-talk',
+      'Eye-line marker keeps the current line where your eyes naturally rest',
+      'Works offline once loaded — no conference wifi required',
+    ],
+    tip: 'Rehearse at the speed you actually speak: read one paragraph aloud, adjust the speed until the marker tracks you, then leave it alone.',
+  },
+  {
+    slug: 'video-recording',
+    path: '/teleprompter-for-video-recording',
+    name: 'YouTube & Video Recording',
+    title: 'Free Teleprompter for YouTube & Video Recording | PromptCue',
+    description:
+      'Record videos that sound natural without memorizing scripts. Free online teleprompter with mirror mode for camera rigs — no watermark, no signup, no word limit.',
+    h1: 'Record to camera without memorizing a word',
+    intro:
+      'The trick to natural talking-head video is reading a script without looking like you are reading. Put your browser window as close to the lens as possible, size the text so you can read it at a glance, and scroll slightly slower than you speak. Mirror mode is built in for beam-splitter teleprompter rigs.',
+    bullets: [
+      'No watermark on the scrolling view — nothing branded ends up in your recording',
+      'Horizontal and vertical mirror modes for beam-splitter glass rigs',
+      'No word limit — a 20-minute video script scrolls just as smoothly',
+      'Restart a take instantly with one key (R)',
+    ],
+    tip: 'Position the text as close to the camera lens as possible and keep the font just large enough to read — smaller text keeps your eye movement invisible.',
+  },
+  {
+    slug: 'podcast',
+    path: '/teleprompter-for-podcast',
+    name: 'Podcasts & Voice-over',
+    title: 'Free Teleprompter for Podcasts & Voice-over | PromptCue',
+    description:
+      'Read podcast intros, ads and voice-over scripts at a steady pace. Free browser teleprompter with speaking-time estimate — no signup, scripts stay local.',
+    h1: 'A steady read for podcasts and voice-over',
+    intro:
+      'Ad reads, sponsor messages, and scripted intros need consistent pacing — rushing is the most common tell of an amateur read. PromptCue estimates the speaking time of your script and scrolls it at a fixed pace, so every take comes out at the same length. Pause with the space bar between sentences to breathe.',
+    bullets: [
+      'Speaking-time estimate before you hit record',
+      'Consistent scroll speed keeps every take the same length',
+      'Silent operation — no clicks or sounds to bleed into your mic',
+      'Drafts autosave locally so scripts survive a browser restart',
+    ],
+    tip: 'For a 30-second ad read, aim for roughly 70–80 words and set the speed so the scroll finishes just after you do.',
+  },
+  {
+    slug: 'sermon',
+    path: '/teleprompter-for-sermon',
+    name: 'Sermons & Worship',
+    title: 'Free Teleprompter for Sermons & Worship | PromptCue',
+    description:
+      'Deliver sermons while keeping eye contact with the congregation. Free online teleprompter for churches — large text, tablet friendly, completely free.',
+    h1: 'Preach with your eyes on the congregation',
+    intro:
+      'Many preachers move between full manuscripts and outlines. Either way, a tablet on the pulpit running a slow scroll beats shuffling paper: the text is always where you left it, the font is readable at arm\u2019s length, and one tap pauses when you depart from the script. Completely free — built for exactly this kind of use.',
+    bullets: [
+      'Large, high-contrast text readable at pulpit distance',
+      'Tap to pause when you leave the manuscript, tap to resume',
+      'Works on any tablet or laptop browser — nothing to install',
+      'Free for churches and ministries, forever, no account needed',
+    ],
+    tip: 'Paste your manuscript with a blank line between paragraphs — PromptCue keeps the spacing, which makes it much easier to find your place again.',
+  },
+  {
+    slug: 'lyrics',
+    path: '/teleprompter-for-lyrics',
+    name: 'Song Lyrics & Music',
+    title: 'Free Lyrics Teleprompter for Singers & Musicians | PromptCue',
+    description:
+      'Scroll song lyrics on stage or in the studio. Free browser teleprompter for singers and musicians — adjustable speed, large text, works on any device.',
+    h1: 'Lyrics that scroll while your hands play',
+    intro:
+      'Singers and musicians can\u2019t page through a binder mid-song. Paste your set\u2019s lyrics, set the scroll to match the tempo, and keep both hands on the instrument. Center alignment and generous line height make lyrics easy to track from a mic stand or keyboard.',
+    bullets: [
+      'Center-aligned mode built for lyric sheets',
+      'Speed adjusts in fine steps to match slow ballads or fast numbers',
+      'Wheel or drag to jump between songs in a set list',
+      'Keep the whole set in one script — no page turns',
+    ],
+    tip: 'Separate songs with a few blank lines and a TITLE IN CAPS — easy to spot when you seek between songs mid-set.',
+  },
+  {
+    slug: 'online-classes',
+    path: '/teleprompter-for-online-classes',
+    name: 'Online Classes & Lectures',
+    title: 'Free Teleprompter for Online Classes & Lectures | PromptCue',
+    description:
+      'Teach smoother online lessons and recorded lectures. Free browser teleprompter for teachers — script scrolls near your webcam, no signup or install.',
+    h1: 'Teach to the camera, not to your notes',
+    intro:
+      'Recorded lectures and live online classes fall flat when the teacher keeps glancing down at notes. Put your lesson script in a browser window right under your webcam: your delivery stays fluent and your eyes stay near the lens. Pause instantly when students ask questions, resume where you left off.',
+    bullets: [
+      'Position the window near your webcam for natural eye contact',
+      'Space bar pauses instantly for questions, resumes in place',
+      'No install — works on school laptops with just a browser',
+      'Scripts autosave locally between lessons',
+    ],
+    tip: 'Shrink the browser window and dock it at the top of the screen directly below your camera — the closer the text is to the lens, the more natural you look.',
+  },
+  {
+    slug: 'interview',
+    path: '/teleprompter-for-interviews',
+    name: 'Interviews & Live Streams',
+    title: 'Free Teleprompter for Interviews & Live Streams | PromptCue',
+    description:
+      'Keep talking points visible during interviews, webinars and live streams. Free discreet browser teleprompter — instant pause, no signup, fully private.',
+    h1: 'Talking points on screen, confidence on camera',
+    intro:
+      'In live settings — job interviews, webinars, streams — you don\u2019t read a script verbatim, but a scrolling list of talking points keeps you from blanking. Run PromptCue in a narrow window beside your video call at a very slow speed, or paused, and nudge it along with the wheel as the conversation moves.',
+    bullets: [
+      'Runs in a small window beside any video call app',
+      'Wheel and drag seeking for non-linear conversations',
+      'Very slow speed settings for gradual talking-point scrolls',
+      'Nothing is uploaded — your notes stay completely private',
+    ],
+    tip: 'For live conversation, keep the prompter paused and scroll manually with the wheel — you control the pace, not the clock.',
+  },
+]
+
+export function useCaseBySlug(slug: string | undefined): UseCase | undefined {
+  return USE_CASES.find((u) => u.slug === slug)
+}

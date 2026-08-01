@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "prompter",
+  "compatibility_date": "2026-07-01",
+  "main": "worker/index.ts",
+  "routes": [{ "pattern": "prompter.zalize.com", "custom_domain": true }],
+  "assets": {
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "kv_namespaces": [
+    // Anonymous usage counters (page views / prompter starts). No PII.
+    { "binding": "KV", "id": "REPLACE_KV_ID" }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}
