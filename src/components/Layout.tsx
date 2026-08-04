@@ -4,18 +4,38 @@ import { USE_CASES } from '@/lib/useCases'
 
 export function SiteHeader() {
   return (
-    <header className="border-b">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
-      <Link to="/" className="flex items-center gap-2 font-bold">
-        <MonitorPlay className="text-primary size-5" aria-hidden />
-        PromptCue
-      </Link>
-        <nav className="text-muted-foreground flex items-center gap-4 text-sm">
-          <a href="/#use-cases" className="hover:text-foreground">
+    <header className="border-border/60 bg-background/80 sticky top-0 z-40 border-b backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+        <Link to="/" className="flex items-center gap-2 text-lg font-extrabold tracking-tight">
+          <span className="bg-foreground text-primary flex size-8 items-center justify-center rounded-lg">
+            <MonitorPlay className="size-4.5" aria-hidden />
+          </span>
+          PromptCue
+        </Link>
+        <nav className="flex items-center gap-1 text-sm font-medium sm:gap-2">
+          <a
+            href="/#how-it-works"
+            className="text-muted-foreground hover:text-foreground rounded-lg px-3 py-2 max-md:hidden"
+          >
+            How it works
+          </a>
+          <a
+            href="/#use-cases"
+            className="text-muted-foreground hover:text-foreground rounded-lg px-3 py-2 max-sm:hidden"
+          >
             Use cases
           </a>
-          <a href="/#faq" className="hover:text-foreground max-sm:hidden">
+          <a
+            href="/#faq"
+            className="text-muted-foreground hover:text-foreground rounded-lg px-3 py-2 max-sm:hidden"
+          >
             FAQ
+          </a>
+          <a
+            href="/#top"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 ml-1 rounded-lg px-4 py-2 font-semibold shadow-sm"
+          >
+            Start free
           </a>
         </nav>
       </div>
@@ -25,37 +45,75 @@ export function SiteHeader() {
 
 export function SiteFooter() {
   return (
-    <footer className="border-t">
-      <div className="text-muted-foreground mx-auto max-w-5xl space-y-4 px-4 py-8 text-sm">
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-          {USE_CASES.map((u) => (
-            <Link key={u.slug} to={u.path} className="hover:text-foreground">
-              Teleprompter for {u.name}
+    <footer className="border-t bg-white">
+      <div className="mx-auto max-w-6xl px-4 py-12">
+        <div className="grid gap-10 sm:grid-cols-[1.2fr_1fr_1fr]">
+          <div>
+            <Link
+              to="/"
+              className="flex items-center gap-2 text-lg font-extrabold tracking-tight"
+            >
+              <span className="bg-foreground text-primary flex size-8 items-center justify-center rounded-lg">
+                <MonitorPlay className="size-4.5" aria-hidden />
+              </span>
+              PromptCue
             </Link>
-          ))}
+            <p className="text-muted-foreground mt-3 max-w-sm text-sm leading-relaxed">
+              A free browser teleprompter. Scripts are stored only in your browser&rsquo;s
+              local storage and are never uploaded to our servers — no personal data, no
+              cookies, no tracking of script content.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm font-bold">Use cases</h3>
+            <ul className="mt-3 space-y-2 text-sm">
+              {USE_CASES.slice(0, 4).map((u) => (
+                <li key={u.slug}>
+                  <Link
+                    to={u.path}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Teleprompter for {u.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-sm font-bold">More</h3>
+            <ul className="mt-3 space-y-2 text-sm">
+              {USE_CASES.slice(4).map((u) => (
+                <li key={u.slug}>
+                  <Link
+                    to={u.path}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Teleprompter for {u.name}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <a
+                  href="https://speech.zalize.com"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  SpeakEasy — AI speech writer
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
-        <p>
-          Writing a speech first? Try{' '}
-          <a
-            href="https://speech.zalize.com"
-            className="text-primary underline underline-offset-2"
-          >
-            SpeakEasy — AI speech writer for weddings, toasts and life’s big moments
-          </a>
-          .
-        </p>
-        <p className="text-xs">
-          PromptCue is a free browser teleprompter. Your scripts are stored only in your
-          browser’s local storage and are never uploaded to our servers. Provided
-          &ldquo;as is&rdquo; without warranty of any kind — please rehearse and verify
-          your material before any live or recorded use. We collect only anonymous
-          aggregate usage counts (page views and prompter starts); no personal data, no
-          cookies, no tracking of script content.
-        </p>
-        <p className="text-xs">
-          © {new Date().getFullYear()} PromptCue · prompter.zalize.com — part of the
-          Zalize tools family.
-        </p>
+        <div className="text-muted-foreground mt-10 border-t pt-6 text-xs leading-relaxed">
+          <p>
+            Provided &ldquo;as is&rdquo; without warranty of any kind — please rehearse
+            and verify your material before any live or recorded use. We collect only
+            anonymous aggregate usage counts (page views and prompter starts).
+          </p>
+          <p className="mt-2">
+            © {new Date().getFullYear()} PromptCue · prompter.zalize.com — part of the
+            Zalize tools family.
+          </p>
+        </div>
       </div>
     </footer>
   )

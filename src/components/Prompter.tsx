@@ -258,7 +258,7 @@ export default function Prompter({
       {/* progress bar */}
       <div className="absolute top-0 right-0 left-0 z-30 h-1 bg-white/10">
         <div
-          className="h-full bg-emerald-400 transition-[width] duration-150"
+          className="bg-primary h-full transition-[width] duration-150"
           style={{ width: `${progress * 100}%` }}
         />
       </div>
@@ -266,8 +266,8 @@ export default function Prompter({
       {/* eye-line guide */}
       {settings.guide && (
         <div className="pointer-events-none absolute top-[25vh] right-0 left-0 z-20 flex items-center">
-          <div className="ml-1 h-0 w-0 border-y-8 border-l-12 border-y-transparent border-l-emerald-400" />
-          <div className="h-px flex-1 bg-emerald-400/30" />
+          <div className="border-l-primary ml-1 h-0 w-0 border-y-8 border-l-12 border-y-transparent" />
+          <div className="bg-primary/30 h-px flex-1" />
         </div>
       )}
 
@@ -372,7 +372,7 @@ export default function Prompter({
           </button>
           <span className="mx-1 h-6 w-px bg-white/15" />
           <button
-            className={`rounded-xl p-2.5 hover:bg-white/10 ${settings.mirrorX ? 'text-emerald-400' : ''}`}
+            className={`rounded-xl p-2.5 hover:bg-white/10 ${settings.mirrorX ? 'text-primary' : ''}`}
             onClick={() => {
               if (!settings.mirrorX) track('mirror_on')
               onSettingsChange({ ...settings, mirrorX: !settings.mirrorX })
