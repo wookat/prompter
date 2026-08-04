@@ -201,7 +201,7 @@ export default function Home() {
 
           <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_310px]">
             {/* dark studio editor */}
-            <div className="flex flex-col overflow-hidden rounded-3xl bg-neutral-900 shadow-xl ring-1 ring-black/10">
+            <div className="flex min-w-0 flex-col overflow-hidden rounded-3xl bg-neutral-900 shadow-xl ring-1 ring-black/10">
               <div className="flex items-center gap-2 border-b border-white/10 px-5 py-3">
                 <span className="size-2.5 rounded-full bg-red-400/80" aria-hidden />
                 <span className="size-2.5 rounded-full bg-amber-400/80" aria-hidden />
@@ -218,7 +218,7 @@ export default function Home() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Type or paste your script here…"
-                className="min-h-72 flex-1 resize-y bg-transparent px-5 py-4 text-base leading-relaxed text-white outline-none placeholder:text-white/40 sm:min-h-96 sm:text-lg"
+                className="min-h-72 w-full min-w-0 flex-1 resize-y bg-transparent px-5 py-4 text-base leading-relaxed text-white outline-none placeholder:text-white/40 sm:min-h-96 sm:text-lg"
               />
               <div className="flex items-center justify-between border-t border-white/10 px-5 py-2.5 text-xs text-white/40">
                 <span>Autosaved locally — nothing is uploaded</span>
@@ -227,7 +227,7 @@ export default function Home() {
             </div>
 
             {/* control deck */}
-            <aside className="space-y-5 rounded-3xl border bg-white p-5 shadow-sm">
+            <aside className="min-w-0 space-y-5 rounded-3xl border bg-white p-5 shadow-sm">
               <div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="speed" className="font-semibold">
