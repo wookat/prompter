@@ -110,6 +110,16 @@ export function SiteFooter() {
             anonymous aggregate usage counts (page views and prompter starts).
           </p>
           <p className="mt-2">
+            <span className="font-medium">More from ZALIZE:</span>{' '}
+            <a href="https://speech.zalize.com" className="hover:text-foreground">SpeakEasy Speech</a>
+            {' · '}
+            <a href="https://scribe.zalize.com" className="hover:text-foreground">ScribeFlow</a>
+            {' · '}
+            <a href="https://ext.zalize.com" className="hover:text-foreground">SnapMark</a>
+            {' · '}
+            <a href="https://qr.zalize.com" className="hover:text-foreground">HonestQR</a>
+          </p>
+          <p className="mt-2">
             © {new Date().getFullYear()} PromptCue · prompter.zalize.com — part of the
             Zalize tools family.
           </p>
