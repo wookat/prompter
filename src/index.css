@@ -1,29 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(0.99 0.002 250);
-  --foreground: oklch(0.18 0.02 260);
+  --radius: 0.75rem;
+  --background: oklch(0.988 0.008 85);
+  --foreground: oklch(0.17 0.01 60);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 260);
+  --card-foreground: oklch(0.17 0.01 60);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 260);
-  --primary: oklch(0.5 0.18 265);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.96 0.01 260);
-  --secondary-foreground: oklch(0.25 0.03 260);
-  --muted: oklch(0.96 0.01 260);
-  --muted-foreground: oklch(0.52 0.02 260);
-  --accent: oklch(0.94 0.03 265);
-  --accent-foreground: oklch(0.25 0.03 260);
+  --popover-foreground: oklch(0.17 0.01 60);
+  --primary: oklch(0.8 0.16 75);
+  --primary-foreground: oklch(0.2 0.03 60);
+  --secondary: oklch(0.96 0.015 85);
+  --secondary-foreground: oklch(0.25 0.02 60);
+  --muted: oklch(0.955 0.012 85);
+  --muted-foreground: oklch(0.5 0.015 60);
+  --accent: oklch(0.95 0.04 80);
+  --accent-foreground: oklch(0.25 0.02 60);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.91 0.01 260);
-  --input: oklch(0.91 0.01 260);
-  --ring: oklch(0.5 0.18 265);
+  --border: oklch(0.9 0.015 80);
+  --input: oklch(0.9 0.015 80);
+  --ring: oklch(0.8 0.16 75);
 }
 
 @theme inline {
@@ -59,7 +60,7 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family:
-      'Inter', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
-      system-ui, sans-serif;
+      'Plus Jakarta Sans', 'Inter', 'PingFang SC', 'Hiragino Sans GB',
+      'Microsoft YaHei', system-ui, sans-serif;
   }
 }

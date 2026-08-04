@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   AlignCenter,
   AlignLeft,
+  Check,
   Clock,
   Eye,
   FlipHorizontal2,
@@ -14,13 +15,13 @@ import {
   Save,
   ScrollText,
   Trash2,
+  X,
   Zap,
 } from 'lucide-react'
 import { SiteFooter, SiteHeader } from '@/components/Layout'
 import Prompter from '@/components/Prompter'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import {
   type PrompterSettings,
   type SavedScript,
@@ -105,6 +106,32 @@ const FEATURES = [
   },
 ]
 
+const STEPS = [
+  {
+    title: 'Paste your script',
+    text: 'Type or paste anything — a speech, video script, lecture or lyrics. It autosaves locally as you type.',
+  },
+  {
+    title: 'Set your pace',
+    text: 'Pick a scroll speed and text size, add a countdown, and flip on mirror mode for a beam-splitter rig.',
+  },
+  {
+    title: 'Press Start & read',
+    text: 'Fullscreen, smooth scrolling with an eye-line guide. Space or tap to pause, arrows to fine-tune live.',
+  },
+]
+
+const COMPARISON: { label: string; us: string | boolean; them: string | boolean }[] = [
+  { label: 'Price', us: '100% free, no paid tier', them: 'Free trial, then subscription' },
+  { label: 'Account required', us: false, them: true },
+  { label: 'Watermark on output', us: false, them: 'Often on free plan' },
+  { label: 'Script privacy', us: 'Never leaves your device', them: 'Uploaded to cloud' },
+  { label: 'Word / script limit', us: 'Unlimited', them: 'Limited on free plan' },
+  { label: 'Mirror & flip modes', us: true, them: true },
+  { label: 'Countdown + eye-line guide', us: true, them: 'Varies' },
+  { label: 'Works without install', us: true, them: 'App download required' },
+]
+
 export default function Home() {
   const [text, setText] = useState<string>(() => loadCurrentText() || SAMPLE)
   const [settings, setSettings] = useState<PrompterSettings>(() => loadSettings())
@@ -150,44 +177,65 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-svh flex-col">
+    <div id="top" className="flex min-h-svh flex-col">
       <SiteHeader />
 
       <main className="flex-1">
         {/* hero + editor */}
-        <section className="mx-auto max-w-5xl px-4 pt-10 pb-6">
+        <section className="mx-auto max-w-6xl px-4 pt-12 pb-10 sm:pt-16">
           <div className="text-center">
-            <h1 className="mx-auto max-w-3xl text-3xl font-bold tracking-tight sm:text-5xl">
-              Free online teleprompter,
-              <span className="text-primary"> right in your browser</span>
+            <p className="bg-accent text-accent-foreground mx-auto w-fit rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide">
+              Free forever · No signup · No watermark · Private
+            </p>
+            <h1 className="mx-auto mt-5 max-w-3xl text-4xl font-extrabold tracking-tight text-balance sm:text-6xl">
+              Read your script.
+              <br />
+              Look at the camera.
             </h1>
-            <p className="text-muted-foreground mx-auto mt-3 max-w-2xl text-base sm:text-lg">
-              Paste your script, press Start, and read at your own pace. No signup, no
-              watermark, no word limit — and your script never leaves your device.
+            <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-base text-balance sm:text-lg">
+              A free online teleprompter that runs right in your browser. Paste your
+              script, press Start, and read at your own pace — your script never leaves
+              your device.
             </p>
           </div>
 
-          <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_290px]">
-            <div>
-              <Textarea
+          <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_310px]">
+            {/* dark studio editor */}
+            <div className="flex flex-col overflow-hidden rounded-3xl bg-neutral-900 shadow-xl ring-1 ring-black/10">
+              <div className="flex items-center gap-2 border-b border-white/10 px-5 py-3">
+                <span className="size-2.5 rounded-full bg-red-400/80" aria-hidden />
+                <span className="size-2.5 rounded-full bg-amber-400/80" aria-hidden />
+                <span className="size-2.5 rounded-full bg-emerald-400/80" aria-hidden />
+                <span className="ml-2 text-xs font-medium tracking-wide text-white/50">
+                  Your script
+                </span>
+                <span className="ml-auto text-xs text-white/50 tabular-nums">
+                  {words} words · ≈ {formatDuration(seconds)} spoken
+                </span>
+              </div>
+              <textarea
                 aria-label="Your script"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="Paste or type your script here…"
-                className="min-h-72 resize-y text-base leading-relaxed sm:min-h-96"
+                placeholder="Type or paste your script here…"
+                className="min-h-72 flex-1 resize-y bg-transparent px-5 py-4 text-base leading-relaxed text-white outline-none placeholder:text-white/40 sm:min-h-96 sm:text-lg"
               />
-              <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                <span>{words} words</span>
-                <span>≈ {formatDuration(seconds)} spoken</span>
-                <span className="max-sm:hidden">Autosaved locally</span>
+              <div className="flex items-center justify-between border-t border-white/10 px-5 py-2.5 text-xs text-white/40">
+                <span>Autosaved locally — nothing is uploaded</span>
+                <span className="max-sm:hidden">Space to pause · M mirror · Esc exit</span>
               </div>
             </div>
 
-            <aside className="space-y-4 rounded-xl border p-4">
+            {/* control deck */}
+            <aside className="space-y-5 rounded-3xl border bg-white p-5 shadow-sm">
               <div>
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="speed">Speed</Label>
-                  <span className="text-muted-foreground text-sm">{settings.speed}</span>
+                  <Label htmlFor="speed" className="font-semibold">
+                    Speed
+                  </Label>
+                  <span className="text-muted-foreground text-sm tabular-nums">
+                    {settings.speed}
+                  </span>
                 </div>
                 <input
                   id="speed"
@@ -198,13 +246,15 @@ export default function Home() {
                   onChange={(e) =>
                     updateSettings({ ...settings, speed: Number(e.target.value) })
                   }
-                  className="accent-primary mt-1 w-full"
+                  className="accent-primary mt-1.5 w-full"
                 />
               </div>
               <div>
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="fontSize">Text size</Label>
-                  <span className="text-muted-foreground text-sm">
+                  <Label htmlFor="fontSize" className="font-semibold">
+                    Text size
+                  </Label>
+                  <span className="text-muted-foreground text-sm tabular-nums">
                     {settings.fontSize}px
                   </span>
                 </div>
@@ -218,13 +268,15 @@ export default function Home() {
                   onChange={(e) =>
                     updateSettings({ ...settings, fontSize: Number(e.target.value) })
                   }
-                  className="accent-primary mt-1 w-full"
+                  className="accent-primary mt-1.5 w-full"
                 />
               </div>
               <div>
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="countdown">Countdown</Label>
-                  <span className="text-muted-foreground text-sm">
+                  <Label htmlFor="countdown" className="font-semibold">
+                    Countdown
+                  </Label>
+                  <span className="text-muted-foreground text-sm tabular-nums">
                     {settings.countdown}s
                   </span>
                 </div>
@@ -237,7 +289,7 @@ export default function Home() {
                   onChange={(e) =>
                     updateSettings({ ...settings, countdown: Number(e.target.value) })
                   }
-                  className="accent-primary mt-1 w-full"
+                  className="accent-primary mt-1.5 w-full"
                 />
               </div>
               <div className="flex flex-wrap gap-2">
@@ -287,7 +339,7 @@ export default function Home() {
               </div>
 
               <Button
-                className="w-full"
+                className="w-full text-base font-bold shadow-md"
                 size="lg"
                 disabled={!text.trim()}
                 onClick={() => setRunning(true)}
@@ -310,7 +362,7 @@ export default function Home() {
 
               {scripts.length > 0 && (
                 <div>
-                  <p className="text-muted-foreground mb-2 flex items-center gap-1.5 text-xs font-medium">
+                  <p className="text-muted-foreground mb-2 flex items-center gap-1.5 text-xs font-semibold">
                     <FolderOpen className="size-3.5" /> Saved scripts (on this device)
                   </p>
                   <ul className="space-y-1">
@@ -339,41 +391,120 @@ export default function Home() {
           </div>
         </section>
 
-        {/* features */}
-        <section className="border-t bg-neutral-50/60">
-          <div className="mx-auto max-w-5xl px-4 py-12">
-            <h2 className="text-center text-2xl font-bold">
-              Everything a teleprompter should be — free
+        {/* how it works */}
+        <section id="how-it-works" className="border-t bg-white">
+          <div className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 sm:py-20">
+            <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+              On camera in three steps
             </h2>
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {FEATURES.map((f) => (
-                <div key={f.title} className="rounded-xl border bg-white p-5">
-                  <f.icon className="text-primary size-6" aria-hidden />
-                  <h3 className="mt-3 font-semibold">{f.title}</h3>
-                  <p className="text-muted-foreground mt-1 text-sm">{f.text}</p>
+            <div className="mt-10 grid gap-6 sm:grid-cols-3">
+              {STEPS.map((s, i) => (
+                <div key={s.title} className="rounded-2xl border p-6">
+                  <span className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-xl text-sm font-extrabold">
+                    {i + 1}
+                  </span>
+                  <h3 className="mt-4 text-lg font-bold">{s.title}</h3>
+                  <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed">
+                    {s.text}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
+        {/* features */}
+        <section className="mx-auto max-w-6xl px-4 py-16 sm:py-20">
+          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+            Everything a teleprompter should be — free
+          </h2>
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((f) => (
+              <div
+                key={f.title}
+                className="rounded-2xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+              >
+                <span className="bg-accent flex size-11 items-center justify-center rounded-xl">
+                  <f.icon className="text-accent-foreground size-5" aria-hidden />
+                </span>
+                <h3 className="mt-4 font-bold">{f.title}</h3>
+                <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed">
+                  {f.text}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* comparison */}
+        <section className="border-t bg-white">
+          <div className="mx-auto max-w-4xl px-4 py-16 sm:py-20">
+            <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Why creators pick PromptCue
+            </h2>
+            <p className="text-muted-foreground mx-auto mt-3 max-w-2xl text-center text-sm sm:text-base">
+              Everything the paid teleprompter apps charge for, without the paywall.
+            </p>
+            <div className="mt-10 overflow-x-auto rounded-2xl border shadow-sm">
+              <table className="w-full min-w-[520px] text-sm">
+                <thead>
+                  <tr className="border-b text-left">
+                    <th className="text-muted-foreground px-4 py-3 font-medium" />
+                    <th className="px-4 py-3 font-extrabold">PromptCue</th>
+                    <th className="text-muted-foreground px-4 py-3 font-medium">
+                      Typical teleprompter apps
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {COMPARISON.map((row) => (
+                    <tr key={row.label} className="border-b last:border-b-0">
+                      <td className="text-muted-foreground px-4 py-3 font-medium">
+                        {row.label}
+                      </td>
+                      <td className="px-4 py-3 font-semibold">
+                        {row.us === true ? (
+                          <Check className="size-5 text-emerald-600" aria-label="Yes" />
+                        ) : row.us === false ? (
+                          <X className="text-muted-foreground size-5" aria-label="No" />
+                        ) : (
+                          row.us
+                        )}
+                      </td>
+                      <td className="text-muted-foreground px-4 py-3">
+                        {row.them === true ? (
+                          <Check className="size-5" aria-label="Yes" />
+                        ) : row.them === false ? (
+                          <X className="size-5" aria-label="No" />
+                        ) : (
+                          row.them
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
         {/* use cases */}
-        <section id="use-cases" className="mx-auto max-w-5xl scroll-mt-6 px-4 py-12">
-          <h2 className="text-center text-2xl font-bold">
+        <section id="use-cases" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 sm:py-20">
+          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
             One prompter, every speaking moment
           </h2>
-          <p className="text-muted-foreground mx-auto mt-2 max-w-2xl text-center text-sm">
+          <p className="text-muted-foreground mx-auto mt-3 max-w-2xl text-center text-sm sm:text-base">
             Guides for getting the most out of a browser teleprompter in your situation.
           </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {USE_CASES.map((u) => (
               <Link
                 key={u.slug}
                 to={u.path}
-                className="hover:border-primary/50 rounded-xl border p-4 transition-colors"
+                className="hover:border-primary rounded-2xl border bg-white p-5 shadow-sm transition-colors"
               >
-                <h3 className="text-sm font-semibold">{u.name}</h3>
-                <p className="text-muted-foreground mt-1 line-clamp-3 text-xs">
+                <h3 className="text-sm font-bold">{u.name}</h3>
+                <p className="text-muted-foreground mt-1.5 line-clamp-3 text-xs leading-relaxed">
                   {u.intro}
                 </p>
               </Link>
@@ -382,17 +513,50 @@ export default function Home() {
         </section>
 
         {/* FAQ */}
-        <section id="faq" className="border-t">
-          <div className="mx-auto max-w-3xl scroll-mt-6 px-4 py-12">
-            <h2 className="text-center text-2xl font-bold">Frequently asked questions</h2>
-            <dl className="mt-8 space-y-6">
+        <section id="faq" className="border-t bg-white">
+          <div className="mx-auto max-w-3xl scroll-mt-20 px-4 py-16 sm:py-20">
+            <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Frequently asked questions
+            </h2>
+            <div className="mt-10 space-y-3">
               {FAQ.map((f) => (
-                <div key={f.q}>
-                  <dt className="font-semibold">{f.q}</dt>
-                  <dd className="text-muted-foreground mt-1 text-sm">{f.a}</dd>
-                </div>
+                <details
+                  key={f.q}
+                  className="group rounded-2xl border px-5 py-4 open:shadow-sm"
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold [&::-webkit-details-marker]:hidden">
+                    {f.q}
+                    <span
+                      className="text-muted-foreground transition-transform group-open:rotate-45"
+                      aria-hidden
+                    >
+                      +
+                    </span>
+                  </summary>
+                  <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+                    {f.a}
+                  </p>
+                </details>
               ))}
-            </dl>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA band */}
+        <section className="bg-neutral-900">
+          <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:py-20">
+            <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+              Ready when you are
+            </h2>
+            <p className="mt-3 text-base text-white/70">
+              No signup, no download — your script is already waiting above.
+            </p>
+            <a
+              href="#top"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 mt-8 inline-flex items-center gap-2 rounded-xl px-8 py-3.5 text-base font-bold shadow-lg"
+            >
+              <Play className="size-5" /> Start prompting — it&rsquo;s free
+            </a>
           </div>
         </section>
       </main>

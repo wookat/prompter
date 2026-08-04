@@ -22,11 +22,11 @@ export default function UseCase() {
   return (
     <div className="flex min-h-svh flex-col">
       <SiteHeader />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
-        <p className="text-primary text-sm font-medium">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-12">
+        <p className="bg-accent text-accent-foreground w-fit rounded-full px-3 py-1 text-xs font-semibold tracking-wide">
           Teleprompter for {useCase.name}
         </p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">
+        <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-balance sm:text-5xl">
           {useCase.h1}
         </h1>
         <p className="text-muted-foreground mt-4 leading-relaxed">{useCase.intro}</p>
@@ -40,22 +40,22 @@ export default function UseCase() {
           ))}
         </ul>
 
-        <div className="bg-accent/50 mt-8 flex gap-3 rounded-xl border p-4">
+        <div className="bg-accent/50 mt-8 flex gap-3 rounded-2xl border p-5">
           <Lightbulb className="text-primary mt-0.5 size-5 shrink-0" aria-hidden />
           <p className="text-sm leading-relaxed">{useCase.tip}</p>
         </div>
 
-        <Button asChild size="lg" className="mt-8">
+        <Button asChild size="lg" className="mt-8 font-bold shadow-md">
           <Link to="/">
             Open the free teleprompter <ArrowRight />
           </Link>
         </Button>
 
         <section className="mt-12 border-t pt-8">
-          <h2 className="font-semibold">More use cases</h2>
+          <h2 className="font-bold">More use cases</h2>
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm">
             {USE_CASES.filter((u) => u.slug !== useCase.slug).map((u) => (
-              <Link key={u.slug} to={u.path} className="text-primary hover:underline">
+              <Link key={u.slug} to={u.path} className="font-medium underline-offset-2 hover:underline">
                 {u.name}
               </Link>
             ))}
