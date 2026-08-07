@@ -6,7 +6,9 @@
   "routes": [{ "pattern": "prompter.zalize.com", "custom_domain": true }],
   "assets": {
     "binding": "ASSETS",
-    "not_found_handling": "single-page-application"
+    // All routes exist as prebuilt static files (see scripts/build-seo.mjs),
+    // so unknown paths get a real 404 instead of an SPA soft-404.
+    "not_found_handling": "404-page"
   },
   "kv_namespaces": [
     // Anonymous usage counters (page views / prompter starts). No PII.
