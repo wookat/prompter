@@ -1,3 +1,5 @@
+export type TextColor = 'white' | 'yellow' | 'mint'
+
 export interface PrompterSettings {
   /** Scroll speed step 1–20 (maps to px/s) */
   speed: number
@@ -11,6 +13,15 @@ export interface PrompterSettings {
   countdown: number
   /** Eye-line guide indicator */
   guide: boolean
+  /** Voice-follow mode: scroll follows speech recognition */
+  voice: boolean
+  textColor: TextColor
+}
+
+export const TEXT_COLORS: Record<TextColor, string> = {
+  white: '#ffffff',
+  yellow: '#ffd60a',
+  mint: '#7ef0c8',
 }
 
 export interface SavedScript {
@@ -29,6 +40,8 @@ export const DEFAULT_SETTINGS: PrompterSettings = {
   align: 'left',
   countdown: 3,
   guide: true,
+  voice: false,
+  textColor: 'white',
 }
 
 const SETTINGS_KEY = 'promptcue:settings'

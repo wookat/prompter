@@ -3,7 +3,9 @@ export type TrackEvent =
   | 'prompter_start'
   | 'prompter_finish'
   | 'script_save'
+  | 'script_import'
   | 'mirror_on'
+  | 'voice_on'
 
 export function track(event: TrackEvent): void {
   try {

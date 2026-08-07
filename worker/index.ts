@@ -11,7 +11,9 @@ const EVENTS = new Set([
   'prompter_start',
   'prompter_finish',
   'script_save',
+  'script_import',
   'mirror_on',
+  'voice_on',
 ])
 
 const app = new Hono<{ Bindings: Env }>()
