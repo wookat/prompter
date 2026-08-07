@@ -63,3 +63,11 @@
 - **被否定的上一版判断**：R14「先形似——复刻头部 landing 形态 + 固定速度提词即可上线」。
 - **否定依据（实践数据）**：R16 实测 11 家竞品，Teleprompter.com / Speakflow / PromptSmart / TelepromptMirror 均以语音跟随为第一卖点（截图为证）；我们 Lighthouse 四项 0.98–1.00 说明技术面已不是矛盾，功能差距才是。
 - **合题（本轮方案）**：保留 R14 的 landing 骨架与隐私定位，补上 P0/P1 功能差距，上线后由使用数据（prompter_start / voice_on 埋点）再检验。
+
+## 6. 本轮实施结果（部署后复验）
+
+- 已实现并上线：P0-1 语音跟随（Web Speech API，浏览器内识别、不上传音频，含麦克风失败降级为定速滚动）、P0-2 本地 .txt/.md 导入（FileReader）、P1-1 文字颜色三主题（白/黄/薄荷，localStorage 持久化）、P1-2 首页 FAQPage + WebApplication JSON-LD 与 use-case 页 BreadcrumbList JSON-LD、P1-3 编辑器底部 "Need a script? Try SpeakEasy" 入口。
+- 埋点新增：`voice_on`、`script_import`（worker 白名单同步）。
+- 线上验证：全部 12 条路由（含 sitemap/robots/api/health）HTTP 200；首页含 FAQPage、use-case 页含 BreadcrumbList。
+- Lighthouse（线上，部署后）：accessibility 1.0 / best-practices 1.0 / SEO 1.0 / performance 0.79–0.80（波动主要来自 LCP 2.4s 与首页 hero CLS，列入下轮）。
+- 截图：`docs/benchmark-r16/after-home-1440.png`、`after-prompter-yellow-1440.png`、`after-home-375.png`、`after-home-375-controls.png`（对照 `self-home-*` 前置截图）。
