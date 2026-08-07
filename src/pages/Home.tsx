@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   AlignCenter,
@@ -10,9 +10,11 @@ import {
   FlipVertical2,
   FolderOpen,
   Lock,
+  Mic,
   MonitorSmartphone,
   Play,
   Save,
+  Upload,
   ScrollText,
   Trash2,
   X,
@@ -25,6 +27,8 @@ import { Label } from '@/components/ui/label'
 import {
   type PrompterSettings,
   type SavedScript,
+  TEXT_COLORS,
+  type TextColor,
   countWords,
   estimateSeconds,
   formatDuration,
@@ -37,6 +41,7 @@ import {
 } from '@/lib/store'
 import { track } from '@/lib/track'
 import { USE_CASES } from '@/lib/useCases'
+import { voiceSupported } from '@/lib/voice'
 
 const SAMPLE = `Welcome to PromptCue, your free online teleprompter.
 
@@ -62,6 +67,10 @@ const FAQ = [
   {
     q: 'What is mirror mode for?',
     a: 'Hardware teleprompter rigs reflect the screen in angled beam-splitter glass, which flips the text. Mirror mode pre-flips it horizontally (and vertically if needed) so it reads correctly in the glass.',
+  },
+  {
+    q: 'How does voice follow work?',
+    a: 'Turn on Voice follow and the scroll tracks your reading: the text advances as you speak and waits when you pause. Speech recognition runs entirely in your browser (Chrome, Edge and Safari) — no audio is recorded or uploaded.',
   },
   {
     q: 'What keyboard shortcuts are there?',
@@ -104,6 +113,21 @@ const FEATURES = [
     title: 'Eye-line guide',
     text: 'A subtle marker keeps the current line where your eyes naturally rest, near the camera lens.',
   },
+  {
+    icon: Mic,
+    title: 'Voice follow',
+    text: 'The scroll tracks your reading — speak and the text advances, pause and it waits. Recognition runs in your browser; no audio is uploaded.',
+  },
+  {
+    icon: Upload,
+    title: 'Import your script',
+    text: 'Bring a .txt or .md file straight from your notes app — read locally in your browser, never uploaded.',
+  },
+  {
+    icon: Save,
+    title: 'Saved scripts',
+    text: 'Keep up to 50 scripts on this device and reload them in one click — handy for recurring intros and set lists.',
+  },
 ]
 
 const STEPS = [
@@ -128,6 +152,7 @@ const COMPARISON: { label: string; us: string | boolean; them: string | boolean 
   { label: 'Script privacy', us: 'Never leaves your device', them: 'Uploaded to cloud' },
   { label: 'Word / script limit', us: 'Unlimited', them: 'Limited on free plan' },
   { label: 'Mirror & flip modes', us: true, them: true },
+  { label: 'Voice-follow scrolling', us: true, them: 'Paid feature' },
   { label: 'Countdown + eye-line guide', us: true, them: 'Varies' },
   { label: 'Works without install', us: true, them: 'App download required' },
 ]
@@ -137,6 +162,19 @@ export default function Home() {
   const [settings, setSettings] = useState<PrompterSettings>(() => loadSettings())
   const [scripts, setScripts] = useState<SavedScript[]>(() => loadScripts())
   const [running, setRunning] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const importFile = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      const content = typeof reader.result === 'string' ? reader.result : ''
+      if (content.trim()) {
+        setText(content)
+        track('script_import')
+      }
+    }
+    reader.readAsText(file)
+  }
 
   useEffect(() => {
     track('page_view')
@@ -212,6 +250,25 @@ export default function Home() {
                 <span className="ml-auto text-xs text-white/50 tabular-nums">
                   {words} words · ≈ {formatDuration(seconds)} spoken
                 </span>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".txt,.md,.text,text/plain,text/markdown"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0]
+                    if (f) importFile(f)
+                    e.target.value = ''
+                  }}
+                />
+                <button
+                  type="button"
+                  className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-white/60 hover:bg-white/10 hover:text-white"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Import a .txt or .md file — read locally, never uploaded"
+                >
+                  <Upload className="size-3.5" /> Import
+                </button>
               </div>
               <textarea
                 aria-label="Your script"
@@ -221,7 +278,15 @@ export default function Home() {
                 className="min-h-72 w-full min-w-0 flex-1 resize-y bg-transparent px-5 py-4 text-base leading-relaxed text-white outline-none placeholder:text-white/40 sm:min-h-96 sm:text-lg"
               />
               <div className="flex items-center justify-between border-t border-white/10 px-5 py-2.5 text-xs text-white/40">
-                <span>Autosaved locally — nothing is uploaded</span>
+                <span>
+                  Autosaved locally — nothing is uploaded · Need a script?{' '}
+                  <a
+                    href="https://speech.zalize.com"
+                    className="underline hover:text-white/70"
+                  >
+                    Try SpeakEasy
+                  </a>
+                </span>
                 <span className="max-sm:hidden">Space to pause · M mirror · Esc exit</span>
               </div>
             </div>
@@ -336,6 +401,42 @@ export default function Home() {
                 >
                   <Eye /> Guide
                 </Button>
+                {voiceSupported() && (
+                  <Button
+                    type="button"
+                    variant={settings.voice ? 'default' : 'outline'}
+                    size="sm"
+                    title="Voice follow — the scroll tracks your reading (in-browser, nothing uploaded)"
+                    onClick={() =>
+                      updateSettings({ ...settings, voice: !settings.voice })
+                    }
+                  >
+                    <Mic /> Voice
+                  </Button>
+                )}
+              </div>
+
+              <div>
+                <Label className="font-semibold">Text color</Label>
+                <div className="mt-1.5 flex gap-2">
+                  {(Object.keys(TEXT_COLORS) as TextColor[]).map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      aria-label={`Text color ${c}`}
+                      aria-pressed={settings.textColor === c}
+                      onClick={() => updateSettings({ ...settings, textColor: c })}
+                      className={`flex h-8 flex-1 items-center justify-center rounded-lg border bg-neutral-900 text-sm font-bold ${
+                        settings.textColor === c
+                          ? 'ring-primary ring-2'
+                          : 'hover:border-neutral-400'
+                      }`}
+                      style={{ color: TEXT_COLORS[c] }}
+                    >
+                      Aa
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <Button

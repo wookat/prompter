@@ -37,6 +37,14 @@ function pageHtml(u) {
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
     description: u.description,
   }
+  const breadcrumbs = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'PromptCue', item: `${SITE}/` },
+      { '@type': 'ListItem', position: 2, name: u.name, item: url },
+    ],
+  }
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -51,6 +59,7 @@ function pageHtml(u) {
     <meta property="og:description" content="${esc(u.description)}" />
     <meta property="og:url" content="${url}" />
     <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
+    <script type="application/ld+json">${JSON.stringify(breadcrumbs)}</script>
     <script type="module" crossorigin src="/assets/${jsFile}"></script>
     <link rel="stylesheet" crossorigin href="/assets/${cssFile}" />
   </head>

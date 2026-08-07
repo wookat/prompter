@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ALargeSmall,
   ChevronsDown,
   ChevronsUp,
   FlipHorizontal2,
+  Mic,
+  MicOff,
   Minus,
   Pause,
   Play,
@@ -12,7 +14,14 @@ import {
   X,
 } from 'lucide-react'
 import { track } from '@/lib/track'
-import { type PrompterSettings, speedToPxPerSecond } from '@/lib/store'
+import { TEXT_COLORS, type PrompterSettings, speedToPxPerSecond } from '@/lib/store'
+import {
+  advanceMatch,
+  getSpeechRecognition,
+  tokenizeScript,
+  tokenizeSpeech,
+  voiceSupported,
+} from '@/lib/voice'
 
 interface PrompterProps {
   text: string
@@ -33,6 +42,7 @@ export default function Prompter({
   const [countdown, setCountdown] = useState<number | null>(null)
   const [progress, setProgress] = useState(0)
   const [controlsVisible, setControlsVisible] = useState(true)
+  const [voiceError, setVoiceError] = useState(false)
 
   const rootRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -42,6 +52,11 @@ export default function Prompter({
   const finishedRef = useRef(false)
   const hideTimerRef = useRef<number | null>(null)
   const dragRef = useRef<{ y: number; offset: number; moved: boolean } | null>(null)
+  const matchIdxRef = useRef(-1)
+  const voiceTargetRef = useRef<number | null>(null)
+  const voiceErrorRef = useRef(false)
+
+  const voiceActive = settings.voice && voiceSupported() && !voiceError
 
   useEffect(() => {
     settingsRef.current = settings
@@ -107,9 +122,73 @@ export default function Prompter({
     setPlaying(false)
     finishedRef.current = false
     offsetRef.current = 0
+    matchIdxRef.current = -1
+    voiceTargetRef.current = null
     applyOffset()
     showControls()
   }, [applyOffset, showControls])
+
+  // Voice-follow: browser speech recognition drives the scroll target
+  useEffect(() => {
+    voiceErrorRef.current = voiceError
+  }, [voiceError])
+
+  useEffect(() => {
+    if (!(voiceActive && playing)) return
+    const Ctor = getSpeechRecognition()
+    if (!Ctor) return
+    const { words } = tokenizeScript(text)
+    const consumed = new Map<number, number>()
+    let stopped = false
+    const rec = new Ctor()
+    rec.lang = navigator.language || 'en-US'
+    rec.continuous = true
+    rec.interimResults = true
+    rec.onresult = (e) => {
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const tokens = tokenizeSpeech(e.results[i][0].transcript)
+        const fresh = tokens.slice(consumed.get(i) ?? 0)
+        if (fresh.length > 0) {
+          matchIdxRef.current = advanceMatch(words, matchIdxRef.current, fresh)
+          consumed.set(i, tokens.length)
+          const el = contentRef.current?.querySelector<HTMLElement>(
+            `[data-wi="${matchIdxRef.current}"]`,
+          )
+          if (el) {
+            voiceTargetRef.current = Math.max(
+              0,
+              el.offsetTop - window.innerHeight * 0.25,
+            )
+          }
+        }
+      }
+    }
+    rec.onerror = (e) => {
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+        setVoiceError(true)
+      }
+    }
+    rec.onend = () => {
+      if (!stopped && playingRef.current) {
+        try {
+          rec.start()
+        } catch {
+          /* already started */
+        }
+      }
+    }
+    try {
+      rec.start()
+      track('voice_on')
+    } catch {
+      queueMicrotask(() => setVoiceError(true))
+    }
+    return () => {
+      stopped = true
+      rec.onend = null
+      rec.stop()
+    }
+  }, [voiceActive, playing, text])
 
   // Scroll loop
   useEffect(() => {
@@ -120,7 +199,15 @@ export default function Prompter({
       last = now
       if (playingRef.current) {
         const max = maxOffset()
-        offsetRef.current += speedToPxPerSecond(settingsRef.current.speed) * dt
+        const target = voiceTargetRef.current
+        if (settingsRef.current.voice && !voiceErrorRef.current && target !== null) {
+          const delta = target - offsetRef.current
+          if (Math.abs(delta) > 1) {
+            offsetRef.current += delta * Math.min(1, dt * 3)
+          }
+        } else if (!(settingsRef.current.voice && !voiceErrorRef.current)) {
+          offsetRef.current += speedToPxPerSecond(settingsRef.current.speed) * dt
+        }
         if (offsetRef.current >= max) {
           offsetRef.current = max
           playingRef.current = false
@@ -243,7 +330,7 @@ export default function Prompter({
     .join(' ')
     .trim()
 
-  const paragraphs = text.split(/\n+/).filter((p) => p.trim().length > 0)
+  const { paragraphs } = useMemo(() => tokenizeScript(text), [text])
 
   return (
     <div
@@ -282,11 +369,20 @@ export default function Prompter({
             fontSize: settings.fontSize,
             lineHeight: settings.lineHeight,
             textAlign: settings.align,
+            color: TEXT_COLORS[settings.textColor] ?? TEXT_COLORS.white,
           }}
         >
-          {paragraphs.map((p, i) => (
+          {paragraphs.map((chunks, i) => (
             <p key={i} className="mb-[1em] font-semibold tracking-wide">
-              {p}
+              {chunks.map((c, j) =>
+                c.wi === null ? (
+                  c.text
+                ) : (
+                  <span key={j} data-wi={c.wi}>
+                    {c.text}
+                  </span>
+                ),
+              )}
             </p>
           ))}
         </div>
@@ -371,6 +467,23 @@ export default function Prompter({
             <Plus className="size-5" />
           </button>
           <span className="mx-1 h-6 w-px bg-white/15" />
+          {voiceSupported() && (
+            <button
+              className={`rounded-xl p-2.5 hover:bg-white/10 ${settings.voice && !voiceError ? 'text-primary' : ''}`}
+              onClick={() => {
+                setVoiceError(false)
+                onSettingsChange({ ...settings, voice: !settings.voice })
+              }}
+              aria-label={settings.voice ? 'Disable voice follow' : 'Enable voice follow'}
+              title="Voice follow — the scroll tracks your reading"
+            >
+              {settings.voice && !voiceError ? (
+                <Mic className="size-5" />
+              ) : (
+                <MicOff className="size-5" />
+              )}
+            </button>
+          )}
           <button
             className={`rounded-xl p-2.5 hover:bg-white/10 ${settings.mirrorX ? 'text-primary' : ''}`}
             onClick={() => {
@@ -393,6 +506,21 @@ export default function Prompter({
         <p className="pb-2 text-center text-[11px] text-white/40 max-sm:hidden">
           Space play/pause · ↑↓ speed · ←→ text size · M mirror · R restart · Esc exit
         </p>
+      </div>
+
+      {/* voice status */}
+      <div className="pointer-events-none absolute top-3 left-1/2 z-30 -translate-x-1/2">
+        {voiceActive && playing && (
+          <span className="flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1 text-xs text-white/80">
+            <Mic className="text-primary size-3.5 animate-pulse" /> Voice follow —
+            listening (audio stays in your browser)
+          </span>
+        )}
+        {settings.voice && voiceError && (
+          <span className="rounded-full bg-black/70 px-3 py-1 text-xs text-amber-300">
+            Microphone unavailable — using timed scroll
+          </span>
+        )}
       </div>
     </div>
   )
