@@ -107,6 +107,28 @@ Sitemap: ${SITE}/sitemap.xml
 `
 )
 
+writeFileSync(
+  path.join(OUT_DIR, '404.html'),
+  `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Page not found | PromptCue</title>
+    <link rel="stylesheet" crossorigin href="/assets/${cssFile}" />
+  </head>
+  <body>
+    <main style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;font-family:system-ui,sans-serif;text-align:center;padding:2rem">
+      <h1 style="font-size:2rem;font-weight:800">404 — page not found</h1>
+      <p>That page doesn't exist. The teleprompter is waiting for you on the homepage.</p>
+      <p><a href="/" style="font-weight:600;text-decoration:underline">Open the free teleprompter →</a></p>
+    </main>
+  </body>
+</html>
+`
+)
+
 writeFileSync(path.join(OUT_DIR, `${INDEXNOW_KEY}.txt`), INDEXNOW_KEY)
 
 console.log(`SEO build: ${USE_CASES.length} use-case pages, sitemap, robots, IndexNow key`)
