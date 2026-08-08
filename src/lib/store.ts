@@ -52,6 +52,13 @@ export function speedToPxPerSecond(speed: number): number {
   return 14 + speed * 11
 }
 
+/** Baseline speaking pace; speed 6 on the 1–20 scale maps to this. */
+export const BASE_WPM = 140
+
+export function speedToWpm(speed: number): number {
+  return Math.round((BASE_WPM * speed) / 6)
+}
+
 export function loadSettings(): PrompterSettings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY)
@@ -112,9 +119,9 @@ export function countWords(text: string): number {
   return cjk + latin
 }
 
-/** Rough speaking time at ~140 wpm */
+/** Rough speaking time at the baseline pace */
 export function estimateSeconds(text: string): number {
-  return Math.round((countWords(text) / 140) * 60)
+  return Math.round((countWords(text) / BASE_WPM) * 60)
 }
 
 export function formatDuration(totalSeconds: number): string {

@@ -4,6 +4,7 @@ import {
   ChevronsDown,
   ChevronsUp,
   FlipHorizontal2,
+  FlipVertical2,
   Mic,
   MicOff,
   Minus,
@@ -14,7 +15,14 @@ import {
   X,
 } from 'lucide-react'
 import { track } from '@/lib/track'
-import { TEXT_COLORS, type PrompterSettings, speedToPxPerSecond } from '@/lib/store'
+import {
+  BASE_WPM,
+  TEXT_COLORS,
+  type PrompterSettings,
+  countWords,
+  speedToPxPerSecond,
+  speedToWpm,
+} from '@/lib/store'
 import {
   advanceMatch,
   getSpeechRecognition,
@@ -57,6 +65,12 @@ export default function Prompter({
   const voiceErrorRef = useRef(false)
 
   const voiceActive = settings.voice && voiceSupported() && !voiceError
+  const wordCount = useMemo(() => countWords(text), [text])
+  const wordCountRef = useRef(wordCount)
+
+  useEffect(() => {
+    wordCountRef.current = wordCount
+  }, [wordCount])
 
   useEffect(() => {
     settingsRef.current = settings
@@ -206,7 +220,15 @@ export default function Prompter({
             offsetRef.current += delta * Math.min(1, dt * 3)
           }
         } else if (!(settingsRef.current.voice && !voiceErrorRef.current)) {
-          offsetRef.current += speedToPxPerSecond(settingsRef.current.speed) * dt
+          // Pace-calibrated scroll: at speed 6 the full script takes the
+          // spoken-time estimate (BASE_WPM); other speeds scale linearly.
+          const baseSecs = (wordCountRef.current / BASE_WPM) * 60
+          const pace = settingsRef.current.speed / 6
+          const pps =
+            baseSecs > 4 && max > 0
+              ? (max / baseSecs) * pace
+              : speedToPxPerSecond(settingsRef.current.speed)
+          offsetRef.current += pps * dt
         }
         if (offsetRef.current >= max) {
           offsetRef.current = max
@@ -263,6 +285,11 @@ export default function Prompter({
         case 'm':
         case 'M':
           onSettingsChange({ ...s, mirrorX: !s.mirrorX })
+          showControls()
+          break
+        case 'v':
+        case 'V':
+          onSettingsChange({ ...s, mirrorY: !s.mirrorY })
           showControls()
           break
         case 'Escape':
@@ -388,6 +415,17 @@ export default function Prompter({
         </div>
       </div>
 
+      {/* paused hint */}
+      {!playing && countdown === null && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-[22vh] z-20 flex justify-center">
+          <span className="rounded-full bg-black/70 px-4 py-1.5 text-sm text-white/80">
+            {progress > 0
+              ? 'Paused — tap or press Space to resume'
+              : 'Tap or press Space to start'}
+          </span>
+        </div>
+      )}
+
       {/* countdown overlay */}
       {countdown !== null && (
         <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/80">
@@ -428,8 +466,8 @@ export default function Prompter({
           >
             <ChevronsDown className="size-5" />
           </button>
-          <span className="min-w-14 text-center text-xs text-white/70">
-            speed {settings.speed}
+          <span className="min-w-16 text-center text-xs text-white/70">
+            ≈{speedToWpm(settings.speed)} wpm
           </span>
           <button
             className="rounded-xl p-2.5 hover:bg-white/10"
@@ -494,6 +532,16 @@ export default function Prompter({
           >
             <FlipHorizontal2 className="size-5" />
           </button>
+          <button
+            className={`rounded-xl p-2.5 hover:bg-white/10 ${settings.mirrorY ? 'text-primary' : ''}`}
+            onClick={() => {
+              if (!settings.mirrorY) track('mirror_on')
+              onSettingsChange({ ...settings, mirrorY: !settings.mirrorY })
+            }}
+            aria-label="Mirror vertically"
+          >
+            <FlipVertical2 className="size-5" />
+          </button>
           <span className="mx-1 h-6 w-px bg-white/15" />
           <button
             className="rounded-xl p-2.5 hover:bg-white/10"
@@ -504,7 +552,7 @@ export default function Prompter({
           </button>
         </div>
         <p className="pb-2 text-center text-[11px] text-white/40 max-sm:hidden">
-          Space play/pause · ↑↓ speed · ←→ text size · M mirror · R restart · Esc exit
+          Space play/pause · ↑↓ speed · ←→ text size · M/V mirror · R restart · Esc exit
         </p>
       </div>
 

@@ -38,6 +38,7 @@ import {
   saveCurrentText,
   saveScripts,
   saveSettings,
+  speedToWpm,
 } from '@/lib/store'
 import { track } from '@/lib/track'
 import { USE_CASES } from '@/lib/useCases'
@@ -74,7 +75,7 @@ const FAQ = [
   },
   {
     q: 'What keyboard shortcuts are there?',
-    a: 'Space plays and pauses. Up/Down arrows change speed. Left/Right arrows change text size. M toggles mirror. R restarts. Esc exits.',
+    a: 'Space plays and pauses. Up/Down arrows change speed. Left/Right arrows change text size. M toggles horizontal mirror, V vertical. R restarts. Esc exits.',
   },
   {
     q: 'How do I estimate how long my script takes to read?',
@@ -299,7 +300,7 @@ export default function Home() {
                     Speed
                   </Label>
                   <span className="text-muted-foreground text-sm tabular-nums">
-                    {settings.speed}
+                    ≈{speedToWpm(settings.speed)} wpm
                   </span>
                 </div>
                 <input
