@@ -44,3 +44,16 @@ C2③（首页 SPA 壳/CLS 0.287 预渲染）继续挂账，建议与第 8 轮 S
 ## 修复优先级建议
 
 本轮修：G1（方案 2 优先，至少做方案 1）、G2、G4、G5 · G3 可选（若修请只做数据外置）· G6 随 G1 自然消解
+
+---
+
+## 第 7 轮线上复验 verdict（2026-08-14，生产环境实测，bundle index-BCMEuMVU.js）
+
+- G1 PASS — /api/track 实测 0.070-0.095s（原 0.3-0.4s）；连打 3 次 page_view 后 /api/stats 113→116 正确累计（AE 增量+KV 底数合成生效）；非法事件仍 400。修改员对方案 2 的 90 天保留期补强（每日 cron 折算回 KV total）是审查建议未覆盖的真实缺口，认可。cron 首跑（明日 03:17 UTC）暂未验证，挂账下轮顺手确认 `ae:rollup_ts`。
+- G2 PASS — 日文样本 "こんにちは、世界。これはテストです。" 线上计数 15 words（旧值 7）。
+- G3 PASS — homeContent.ts 数据外置 + upsertScript 下沉 store.ts；线上首页/保存回归正常。
+- G4 PASS — QuotaExceededError 桩下点击 Delete：红条 "Couldn't delete — device storage is unavailable."，条目保留。
+- G5 PASS — 合成 wheel(deltaMode:1, deltaY:3) 位移 120px（×40 生效）。
+- G6 PASS（随 G1 消解）。
+
+结论：6/6 PASS，第 7 轮关闭。遗留：C2③（预渲染/CLS，并入第 8 轮 SEO）、cron rollup 首跑确认、静态 404 页 CTA 旧文案（build-seo.mjs:134，下轮修）、AE_SQL_TOKEN 建议换专用只读 token（需老板操作）。
