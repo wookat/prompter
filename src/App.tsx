@@ -1,15 +1,26 @@
+import { Suspense, lazy } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Home from '@/pages/Home'
-import UseCase from '@/pages/UseCase'
-import { USE_CASES } from '@/lib/useCases'
+import { USE_CASE_LINKS } from '@/lib/useCaseLinks'
+
+// Route-level chunk: use-case page copy only downloads when one is visited
+const UseCase = lazy(() => import('@/pages/UseCase'))
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
-        {USE_CASES.map((u) => (
-          <Route key={u.slug} path={u.path} element={<UseCase />} />
+        {USE_CASE_LINKS.map((u) => (
+          <Route
+            key={u.slug}
+            path={u.path}
+            element={
+              <Suspense fallback={null}>
+                <UseCase />
+              </Suspense>
+            }
+          />
         ))}
         <Route path="*" element={<Home />} />
       </Routes>

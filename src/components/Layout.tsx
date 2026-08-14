@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { MonitorPlay } from 'lucide-react'
-import { USE_CASES } from '@/lib/useCases'
+import { USE_CASE_LINKS } from '@/lib/useCaseLinks'
 
 export function SiteHeader() {
   return (
@@ -67,7 +67,7 @@ export function SiteFooter() {
           <div>
             <h3 className="text-sm font-bold">Use cases</h3>
             <ul className="mt-3 space-y-2 text-sm">
-              {USE_CASES.slice(0, 4).map((u) => (
+              {USE_CASE_LINKS.slice(0, 4).map((u) => (
                 <li key={u.slug}>
                   <Link
                     to={u.path}
@@ -82,7 +82,7 @@ export function SiteFooter() {
           <div>
             <h3 className="text-sm font-bold">More</h3>
             <ul className="mt-3 space-y-2 text-sm">
-              {USE_CASES.slice(4).map((u) => (
+              {USE_CASE_LINKS.slice(4).map((u) => (
                 <li key={u.slug}>
                   <Link
                     to={u.path}

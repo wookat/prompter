@@ -1,7 +1,13 @@
-export interface UseCase {
-  slug: string
-  path: string
-  name: string
+/**
+ * Long-form use-case page copy. Loaded only by the lazy UseCase route
+ * chunk and the build-time SEO script — keep it out of the main bundle.
+ * Navigation link data (slug/path/name) lives in useCaseLinks.ts.
+ */
+import { SITE, USE_CASE_LINKS, type UseCaseLink } from './useCaseLinks.ts'
+
+export { SITE }
+
+export interface UseCase extends UseCaseLink {
   title: string
   description: string
   h1: string
@@ -10,13 +16,11 @@ export interface UseCase {
   tip: string
 }
 
-export const SITE = 'https://prompter.zalize.com'
+type UseCaseContent = Omit<UseCase, 'path' | 'name' | 'blurb'>
 
-export const USE_CASES: UseCase[] = [
+const CONTENT: UseCaseContent[] = [
   {
     slug: 'wedding-speech',
-    path: '/teleprompter-for-wedding-speech',
-    name: 'Wedding Speeches & Toasts',
     title: 'Free Teleprompter for Wedding Speeches & Toasts | PromptCue',
     description:
       'Deliver your wedding speech or toast with confidence. Free online teleprompter — paste your speech, set a comfortable pace, and practice until it flows. No signup.',
@@ -33,8 +37,6 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: 'presentation',
-    path: '/teleprompter-for-presentations',
-    name: 'Presentations & Talks',
     title: 'Free Teleprompter for Presentations & Keynotes | PromptCue',
     description:
       'Keep your presentation on track with a free browser teleprompter. Scroll your talk track next to your slides — adjustable speed, keyboard control, no signup.',
@@ -51,8 +53,6 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: 'video-recording',
-    path: '/teleprompter-for-video-recording',
-    name: 'YouTube & Video Recording',
     title: 'Free Teleprompter for YouTube & Video Recording | PromptCue',
     description:
       'Record videos that sound natural without memorizing scripts. Free online teleprompter with mirror mode for camera rigs — no watermark, no signup, no word limit.',
@@ -69,8 +69,6 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: 'podcast',
-    path: '/teleprompter-for-podcast',
-    name: 'Podcasts & Voice-over',
     title: 'Free Teleprompter for Podcasts & Voice-over | PromptCue',
     description:
       'Read podcast intros, ads and voice-over scripts at a steady pace. Free browser teleprompter with speaking-time estimate — no signup, scripts stay local.',
@@ -87,8 +85,6 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: 'sermon',
-    path: '/teleprompter-for-sermon',
-    name: 'Sermons & Worship',
     title: 'Free Teleprompter for Sermons & Worship | PromptCue',
     description:
       'Deliver sermons while keeping eye contact with the congregation. Free online teleprompter for churches — large text, tablet friendly, completely free.',
@@ -105,8 +101,6 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: 'lyrics',
-    path: '/teleprompter-for-lyrics',
-    name: 'Song Lyrics & Music',
     title: 'Free Lyrics Teleprompter for Singers & Musicians | PromptCue',
     description:
       'Scroll song lyrics on stage or in the studio. Free browser teleprompter for singers and musicians — adjustable speed, large text, works on any device.',
@@ -123,8 +117,6 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: 'online-classes',
-    path: '/teleprompter-for-online-classes',
-    name: 'Online Classes & Lectures',
     title: 'Free Teleprompter for Online Classes & Lectures | PromptCue',
     description:
       'Teach smoother online lessons and recorded lectures. Free browser teleprompter for teachers — script scrolls near your webcam, no signup or install.',
@@ -141,8 +133,6 @@ export const USE_CASES: UseCase[] = [
   },
   {
     slug: 'interview',
-    path: '/teleprompter-for-interviews',
-    name: 'Interviews & Live Streams',
     title: 'Free Teleprompter for Interviews & Live Streams | PromptCue',
     description:
       'Keep talking points visible during interviews, webinars and live streams. Free discreet browser teleprompter — instant pause, no signup, fully private.',
@@ -158,6 +148,12 @@ export const USE_CASES: UseCase[] = [
     tip: 'For live conversation, keep the prompter paused and scroll manually with the wheel — you control the pace, not the clock.',
   },
 ]
+
+export const USE_CASES: UseCase[] = USE_CASE_LINKS.map((link) => {
+  const content = CONTENT.find((c) => c.slug === link.slug)
+  if (!content) throw new Error(`Missing use-case content for ${link.slug}`)
+  return { ...link, ...content }
+})
 
 export function useCaseBySlug(slug: string | undefined): UseCase | undefined {
   return USE_CASES.find((u) => u.slug === slug)
