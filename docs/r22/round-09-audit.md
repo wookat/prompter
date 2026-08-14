@@ -33,3 +33,14 @@
 ## 修复优先级建议
 
 本轮修：I1（一行，价值最高）、I2、I3、I4 · 全部为小改动，建议一次清完
+
+---
+
+## 第 9 轮线上复验 verdict（2026-08-14，生产环境实测，bundle index-CF91vZAB.js）
+
+- I1 PASS — 控制栏淡出（opacity:0）后按 Tab：控制栏立即重现（opacity:1），焦点为可见 Pause 按钮。
+- I2 PASS — 运行态 2 个 polite live region（提示条+状态 pill 常挂载），倒计时实测 `role=timer aria-live=polite text:"2"`。修改员对「常挂载容器才可靠播报」的修正是对的。注：验证的是属性正确性，真机读屏朗读未测（环境无 NVDA/VoiceOver），如实挂账。
+- I3 PASS — axe-core 首页 0 违规（原 2 项全清）。
+- I4 PASS — 首 Tab 出现 "Skip to script editor"，回车跳 #editor。
+
+结论：4/4 PASS，第 9 轮关闭。遗留：H2 其余 6 页扩充、真机读屏抽查（可选）、cron rollup 首跑确认、AE token 更换（需老板）。
