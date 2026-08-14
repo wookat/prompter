@@ -34,3 +34,15 @@ C2③（首页预渲染/CLS）、A5+C4（KV 竞态）、A11（镜像提示——
 ## 修复优先级建议
 
 本轮修：F1、F2、F3（+A11 顺手）、F4 · 均为小改动，建议一次性清完
+
+---
+
+## 第 6 轮线上复验 verdict（2026-08-14，生产环境实测）
+
+- F1 PASS — 全站 "Start free" 已消失，header/CTA 统一 "Start prompting"；pSEO 页渲染后 CTA 为 "Start prompting — it's free"。（注：pSEO 预渲染静态 HTML 里仍有旧句 "Open the free online teleprompter"，SPA 水合后被替换，用户不可见，仅提示下次 build-seo 同步文案。）
+- F2 PASS — 375 宽度 header 五项全部可见可点（截图 r6v-header-375.png）。
+- F3 PASS — 设置区按钮为 "Mirror H / Mirror V"，FAQ/aria 同词表。
+- F4 PASS — 6 个站外链接均 target=_blank rel=noopener。
+- A11 PASS — 开 Mirror H 进提词器出现状态 pill "Mirror H on — press M/V to toggle"，pill 本身 transform:none 正读（截图 r6v-mirror-pill.png）。
+
+结论：6/6 PASS，第 6 轮关闭。遗留：C2③（预渲染/CLS）、A5+C4（KV 竞态）。
