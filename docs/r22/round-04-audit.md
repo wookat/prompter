@@ -30,3 +30,13 @@
 ## 修复优先级建议
 
 本轮修：D1（核心）、D2 · 顺手：D3 · 论证排期：C2③
+
+---
+
+## Verdict（线上复验 2026-08-14，bundle index-Dd_imlnp.js，coarse-pointer 桩 + wakeLock spy）
+
+- **D1: PASS** — 开始滚动 request×1；暂停 release；恢复重新 request；自然滚完全部释放（requests=2, releases=2）。
+- **D2: PASS** — 触屏文案生效：「Paused — tap to resume」「Finished — tap ↻ to restart or ✕ to exit」，键盘快捷键 footer 消失；结束态控制栏 5.5s 后仍常显且可点。
+- **D3: PASS** — 三个滑杆命中区均 32px。
+
+结论：3/3 PASS。挂账：C2③（首页预渲染/CLS）、A5+C4、A10、A11。
