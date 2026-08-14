@@ -163,16 +163,52 @@ export default function Home() {
   const [settings, setSettings] = useState<PrompterSettings>(() => loadSettings())
   const [scripts, setScripts] = useState<SavedScript[]>(() => loadScripts())
   const [running, setRunning] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [importError, setImportError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const savedTimerRef = useRef<number | null>(null)
+  const importErrorTimerRef = useRef<number | null>(null)
+
+  const looksBinary = (content: string) => {
+    if (content.includes('\0')) return true
+    const sample = content.slice(0, 2000)
+    let bad = 0
+    for (const ch of sample) {
+      const c = ch.codePointAt(0) ?? 0
+      if (c === 0xfffd || (c < 32 && c !== 9 && c !== 10 && c !== 13)) bad++
+    }
+    return sample.length > 0 && bad / sample.length > 0.05
+  }
+
+  const showImportError = (msg: string) => {
+    setImportError(msg)
+    if (importErrorTimerRef.current) window.clearTimeout(importErrorTimerRef.current)
+    importErrorTimerRef.current = window.setTimeout(() => setImportError(null), 4000)
+  }
 
   const importFile = (file: File) => {
     const reader = new FileReader()
     reader.onload = () => {
       const content = typeof reader.result === 'string' ? reader.result : ''
-      if (content.trim()) {
-        setText(content)
-        track('script_import')
+      if (!content.trim() || looksBinary(content)) {
+        showImportError('That file doesn\u2019t look like a text script (.txt / .md).')
+        return
       }
+      const unsaved =
+        text.trim() &&
+        text !== SAMPLE &&
+        text !== content &&
+        !scripts.some((s) => s.text === text)
+      if (
+        unsaved &&
+        !window.confirm(
+          'Replace your current script with the imported file? Your current text is not saved.',
+        )
+      ) {
+        return
+      }
+      setText(content)
+      track('script_import')
     }
     reader.readAsText(file)
   }
@@ -200,12 +236,21 @@ export default function Home() {
         .trim()
         .split('\n')[0]
         .slice(0, 60) || 'Untitled script'
-    const next: SavedScript[] = [
-      { id: crypto.randomUUID(), title, text, updatedAt: Date.now() },
-      ...scripts,
-    ].slice(0, 50)
+    const existing = scripts.find((s) => s.text === text)
+    const next: SavedScript[] = existing
+      ? [
+          { ...existing, title, updatedAt: Date.now() },
+          ...scripts.filter((s) => s.id !== existing.id),
+        ]
+      : [
+          { id: crypto.randomUUID(), title, text, updatedAt: Date.now() },
+          ...scripts,
+        ].slice(0, 50)
     setScripts(next)
     saveScripts(next)
+    setSaved(true)
+    if (savedTimerRef.current) window.clearTimeout(savedTimerRef.current)
+    savedTimerRef.current = window.setTimeout(() => setSaved(false), 1500)
     track('script_save')
   }
 
@@ -271,6 +316,11 @@ export default function Home() {
                   <Upload className="size-3.5" /> Import
                 </button>
               </div>
+              {importError && (
+                <p className="border-b border-white/10 bg-red-500/15 px-5 py-2 text-xs text-red-300">
+                  {importError}
+                </p>
+              )}
               <textarea
                 aria-label="Your script"
                 value={text}
@@ -458,7 +508,15 @@ export default function Home() {
                   disabled={!text.trim()}
                   onClick={saveScript}
                 >
-                  <Save /> Save script
+                  {saved ? (
+                    <>
+                      <Check className="text-emerald-600" /> Saved
+                    </>
+                  ) : (
+                    <>
+                      <Save /> Save script
+                    </>
+                  )}
                 </Button>
               </div>
 

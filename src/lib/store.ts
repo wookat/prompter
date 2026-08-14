@@ -31,6 +31,15 @@ export interface SavedScript {
   updatedAt: number
 }
 
+/** Default text size: smaller on narrow (phone) viewports so more lines fit. */
+function defaultFontSize(): number {
+  try {
+    return window.innerWidth < 480 ? 32 : 48
+  } catch {
+    return 48
+  }
+}
+
 export const DEFAULT_SETTINGS: PrompterSettings = {
   speed: 6,
   fontSize: 48,
@@ -60,12 +69,13 @@ export function speedToWpm(speed: number): number {
 }
 
 export function loadSettings(): PrompterSettings {
+  const defaults = { ...DEFAULT_SETTINGS, fontSize: defaultFontSize() }
   try {
     const raw = localStorage.getItem(SETTINGS_KEY)
-    if (!raw) return DEFAULT_SETTINGS
-    return { ...DEFAULT_SETTINGS, ...(JSON.parse(raw) as Partial<PrompterSettings>) }
+    if (!raw) return defaults
+    return { ...defaults, ...(JSON.parse(raw) as Partial<PrompterSettings>) }
   } catch {
-    return DEFAULT_SETTINGS
+    return defaults
   }
 }
 
