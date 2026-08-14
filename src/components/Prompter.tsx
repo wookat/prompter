@@ -40,6 +40,14 @@ interface PrompterProps {
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
 
+const coarsePointer = () => {
+  try {
+    return window.matchMedia('(pointer: coarse)').matches
+  } catch {
+    return false
+  }
+}
+
 export default function Prompter({
   text,
   settings,
@@ -65,6 +73,7 @@ export default function Prompter({
   const voiceTargetRef = useRef<number | null>(null)
   const voiceErrorRef = useRef(false)
 
+  const touch = useMemo(() => coarsePointer(), [])
   const voiceActive = settings.voice && voiceSupported() && !voiceError
   const wordCount = useMemo(() => countWords(text), [text])
   const wordCountRef = useRef(wordCount)
@@ -225,6 +234,32 @@ export default function Prompter({
       rec.stop()
     }
   }, [voiceActive, playing, text])
+
+  // Keep the screen awake while scrolling (phone propped next to the camera)
+  useEffect(() => {
+    if (!playing || !('wakeLock' in navigator)) return
+    let lock: WakeLockSentinel | null = null
+    let active = true
+    const acquire = () => {
+      navigator.wakeLock
+        .request('screen')
+        .then((l) => {
+          if (active) lock = l
+          else void l.release().catch(() => undefined)
+        })
+        .catch(() => undefined)
+    }
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') acquire()
+    }
+    acquire()
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      active = false
+      document.removeEventListener('visibilitychange', onVisibility)
+      void lock?.release().catch(() => undefined)
+    }
+  }, [playing])
 
   // Scroll loop
   useEffect(() => {
@@ -449,10 +484,16 @@ export default function Prompter({
         <div className="pointer-events-none absolute inset-x-0 bottom-[22vh] z-20 flex justify-center">
           <span className="rounded-full border border-white/25 bg-neutral-900 px-4 py-1.5 text-sm text-white shadow-lg">
             {progress >= 1
-              ? 'Finished — press R to restart · Esc to exit'
+              ? touch
+                ? 'Finished — tap ↻ to restart or ✕ to exit'
+                : 'Finished — press R to restart · Esc to exit'
               : progress > 0
-                ? 'Paused — tap or press Space to resume'
-                : 'Tap or press Space to start'}
+                ? touch
+                  ? 'Paused — tap to resume'
+                  : 'Paused — tap or press Space to resume'
+                : touch
+                  ? 'Tap to start'
+                  : 'Tap or press Space to start'}
           </span>
         </div>
       )}
@@ -468,7 +509,9 @@ export default function Prompter({
       <div
         data-controls
         className={`absolute right-0 bottom-0 left-0 z-30 transition-opacity duration-300 ${
-          controlsVisible ? 'opacity-100' : 'pointer-events-none opacity-0'
+          controlsVisible || (progress >= 1 && !playing)
+            ? 'opacity-100'
+            : 'pointer-events-none opacity-0'
         }`}
         onPointerDown={(e) => e.stopPropagation()}
       >

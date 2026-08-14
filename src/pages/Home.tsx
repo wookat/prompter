@@ -362,7 +362,7 @@ export default function Home() {
                   onChange={(e) =>
                     updateSettings({ ...settings, speed: Number(e.target.value) })
                   }
-                  className="accent-primary mt-1.5 w-full"
+                  className="accent-primary mt-1.5 h-8 w-full"
                 />
               </div>
               <div>
@@ -384,7 +384,7 @@ export default function Home() {
                   onChange={(e) =>
                     updateSettings({ ...settings, fontSize: Number(e.target.value) })
                   }
-                  className="accent-primary mt-1.5 w-full"
+                  className="accent-primary mt-1.5 h-8 w-full"
                 />
               </div>
               <div>
@@ -405,7 +405,7 @@ export default function Home() {
                   onChange={(e) =>
                     updateSettings({ ...settings, countdown: Number(e.target.value) })
                   }
-                  className="accent-primary mt-1.5 w-full"
+                  className="accent-primary mt-1.5 h-8 w-full"
                 />
               </div>
               <div className="flex flex-wrap gap-2">
