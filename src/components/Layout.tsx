@@ -12,30 +12,30 @@ export function SiteHeader() {
           </span>
           PromptCue
         </Link>
-        <nav className="flex items-center gap-1 text-sm font-medium sm:gap-2">
+        <nav className="flex min-w-0 items-center gap-1 overflow-x-auto text-sm font-medium whitespace-nowrap sm:gap-2">
           <a
             href="/#how-it-works"
-            className="text-muted-foreground hover:text-foreground rounded-lg px-3 py-2 max-md:hidden"
+            className="text-muted-foreground hover:text-foreground rounded-lg px-3 py-2"
           >
             How it works
           </a>
           <a
             href="/#use-cases"
-            className="text-muted-foreground hover:text-foreground rounded-lg px-3 py-2 max-sm:hidden"
+            className="text-muted-foreground hover:text-foreground rounded-lg px-3 py-2"
           >
             Use cases
           </a>
           <a
             href="/#faq"
-            className="text-muted-foreground hover:text-foreground rounded-lg px-3 py-2 max-sm:hidden"
+            className="text-muted-foreground hover:text-foreground rounded-lg px-3 py-2"
           >
             FAQ
           </a>
           <a
             href="/#top"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 ml-1 rounded-lg px-4 py-2 font-semibold shadow-sm"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 ml-1 shrink-0 rounded-lg px-4 py-2 font-semibold shadow-sm"
           >
-            Start free
+            Start prompting
           </a>
         </nav>
       </div>
@@ -95,6 +95,8 @@ export function SiteFooter() {
               <li>
                 <a
                   href="https://speech.zalize.com"
+                  target="_blank"
+                  rel="noopener"
                   className="text-muted-foreground hover:text-foreground"
                 >
                   SpeakEasy — AI speech writer
@@ -111,13 +113,13 @@ export function SiteFooter() {
           </p>
           <p className="mt-2">
             <span className="font-medium">More from ZALIZE:</span>{' '}
-            <a href="https://speech.zalize.com" className="hover:text-foreground">SpeakEasy Speech</a>
+            <a href="https://speech.zalize.com" target="_blank" rel="noopener" className="hover:text-foreground">SpeakEasy Speech</a>
             {' · '}
-            <a href="https://scribe.zalize.com" className="hover:text-foreground">ScribeFlow</a>
+            <a href="https://scribe.zalize.com" target="_blank" rel="noopener" className="hover:text-foreground">ScribeFlow</a>
             {' · '}
-            <a href="https://ext.zalize.com" className="hover:text-foreground">SnapMark</a>
+            <a href="https://ext.zalize.com" target="_blank" rel="noopener" className="hover:text-foreground">SnapMark</a>
             {' · '}
-            <a href="https://qr.zalize.com" className="hover:text-foreground">HonestQR</a>
+            <a href="https://qr.zalize.com" target="_blank" rel="noopener" className="hover:text-foreground">HonestQR</a>
           </p>
           <p className="mt-2">
             © {new Date().getFullYear()} PromptCue · prompter.zalize.com — part of the
