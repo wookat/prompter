@@ -51,7 +51,7 @@ P1：B1 · 本轮一并修：B2、B3、B4（+遗留 A7、A9）· 可下轮：B5�
 - **B2: PASS** — 点击后按钮显「✓ Saved」；相同文本二次保存不新增（localStorage 条目数 1）。
 - **B3: PASS** — 二进制文件被拒且编辑器内容不变，红色错误条「That file doesn't look like a text script (.txt / .md).」（截图 r2v-binary-reject.png）；有未保存文本时导入弹确认，取消保留原稿、确认后导入。
 - **B4: PASS** — 375px 无持久化设置时默认 32px，1440px 仍 48px；实测 localStorage 已有设置不被覆盖。
-- **A7: PASS** — `/og.png` 200 (image/png)，首页含 og:image/width/height + twitter:card=summary_large_image。注：pSEO 页（如 /for/podcast）线上 HTML 未检出 og:image（curl grep=0），与 fix 报告不符 → 转入下一轮跟踪（C0 遗留）。
+- **A7: PASS** — `/og.png` 200 (image/png)，首页含 og:image/width/height + twitter:card=summary_large_image。pSEO 页实测（/teleprompter-for-podcast）含 og:image + twitter:image + summary_large_image。（审查员先前用错误路径 /for/podcast 误报差异，已更正。）
 - **A9: PASS** — `/` 与 `/api/health` 均带 HSTS / X-Frame-Options / nosniff / Referrer-Policy / Permissions-Policy。
 
-结论：6/6 主项 PASS；1 个子项差异（pSEO og:image 未在线上生效）计入下轮。遗留 backlog：B5、A5、A10、A11。
+结论：6/6 全部 PASS。遗留 backlog：B5、A5、A10、A11。
