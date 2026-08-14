@@ -3,6 +3,9 @@
  * homepage links). The long-form page copy lives in useCases.ts, which is
  * only loaded with the lazy UseCase route chunk.
  */
+/** Primary CTA copy — shared by pages and the static 404 so it can't drift. */
+export const CTA_START_FREE = 'Start prompting \u2014 it\u2019s free'
+
 export interface UseCaseLink {
   slug: string
   path: string

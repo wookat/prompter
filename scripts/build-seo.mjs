@@ -7,12 +7,44 @@
  * Use-case content lives in src/lib/useCases.ts (single source of truth,
  * imported here at build time).
  */
-import { mkdirSync, readdirSync, writeFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { SITE, USE_CASES } from '../src/lib/useCases.ts'
+import { CTA_START_FREE, SITE, USE_CASES } from '../src/lib/useCases.ts'
 
-const OUT_DIR = path.resolve(import.meta.dirname, '../dist/client')
+const ROOT = path.resolve(import.meta.dirname, '..')
+const OUT_DIR = path.join(ROOT, 'dist/client')
 const INDEXNOW_KEY = '9cb164313a6ba5a3a0dcb9ec11cdfb06'
+
+// Prerender the real page components (esbuild-bundled for Node) so every
+// route ships full HTML in #root; React re-renders over it on mount.
+execFileSync(
+  path.join(ROOT, 'node_modules/.bin/esbuild'),
+  [
+    'scripts/prerender.tsx',
+    '--bundle',
+    '--format=esm',
+    '--platform=node',
+    '--jsx=automatic',
+    '--alias:@=./src',
+    '--packages=external',
+    '--outfile=dist/prerender.mjs',
+    '--log-level=warning',
+  ],
+  { cwd: ROOT },
+)
+const { renderRoute } = await import(path.join(ROOT, 'dist/prerender.mjs'))
+
+/** <lastmod> from the newest git commit touching the page's content sources. */
+function lastmodOf(...files) {
+  const dates = files.map((f) =>
+    execFileSync('git', ['log', '-1', '--format=%cs', '--', f], {
+      cwd: ROOT,
+      encoding: 'utf8',
+    }).trim(),
+  )
+  return dates.filter(Boolean).sort().at(-1) ?? new Date().toISOString().slice(0, 10)
+}
 
 const esc = (s) =>
   s
@@ -45,6 +77,15 @@ function pageHtml(u) {
       { '@type': 'ListItem', position: 2, name: u.name, item: url },
     ],
   }
+  const faqLd = u.faq && {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: u.faq.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  }
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -68,18 +109,13 @@ function pageHtml(u) {
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="${SITE}/og.png" />
     <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
-    <script type="application/ld+json">${JSON.stringify(breadcrumbs)}</script>
+    <script type="application/ld+json">${JSON.stringify(breadcrumbs)}</script>${faqLd ? `
+    <script type="application/ld+json">${JSON.stringify(faqLd)}</script>` : ''}
     <script type="module" crossorigin src="/assets/${jsFile}"></script>
     <link rel="stylesheet" crossorigin href="/assets/${cssFile}" />
   </head>
   <body>
-    <div id="root"></div>
-    <noscript>
-      <h1>${esc(u.h1)}</h1>
-      <p>${esc(u.intro)}</p>
-      <ul>${u.bullets.map((b) => `<li>${esc(b)}</li>`).join('')}</ul>
-      <p><a href="/">Open the free online teleprompter</a></p>
-    </noscript>
+    <div id="root">${renderRoute(u.path)}</div>
   </body>
 </html>
 `
@@ -93,14 +129,27 @@ for (const u of USE_CASES) {
   writeFileSync(path.join(OUT_DIR, `${u.path.replace(/^\//, '')}.html`), pageHtml(u))
 }
 
-const today = new Date().toISOString().slice(0, 10)
+// Inject the prerendered homepage into Vite's built index.html.
+const indexPath = path.join(OUT_DIR, 'index.html')
+const indexHtml = readFileSync(indexPath, 'utf8')
+if (!indexHtml.includes('<div id="root"></div>')) {
+  throw new Error('index.html: #root mount point not found')
+}
+writeFileSync(
+  indexPath,
+  indexHtml.replace('<div id="root"></div>', `<div id="root">${renderRoute('/')}</div>`),
+)
+
+const HOME_SOURCES = ['src/pages/Home.tsx', 'src/lib/homeContent.ts']
+const USECASE_SOURCES = ['src/lib/useCases.ts', 'src/lib/useCaseLinks.ts', 'src/pages/UseCase.tsx']
 writeFileSync(
   path.join(OUT_DIR, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls
   .map(
-    (p) => `  <url><loc>${SITE}${p === '/' ? '/' : p}</loc><lastmod>${today}</lastmod></url>`
+    (p) =>
+      `  <url><loc>${SITE}${p === '/' ? '/' : p}</loc><lastmod>${lastmodOf(...(p === '/' ? HOME_SOURCES : USECASE_SOURCES))}</lastmod></url>`
   )
   .join('\n')}
 </urlset>
@@ -131,7 +180,7 @@ writeFileSync(
     <main style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;font-family:system-ui,sans-serif;text-align:center;padding:2rem">
       <h1 style="font-size:2rem;font-weight:800">404 — page not found</h1>
       <p>That page doesn't exist. The teleprompter is waiting for you on the homepage.</p>
-      <p><a href="/" style="font-weight:600;text-decoration:underline">Open the free teleprompter →</a></p>
+      <p><a href="/" style="font-weight:600;text-decoration:underline">${esc(CTA_START_FREE)} →</a></p>
     </main>
   </body>
 </html>

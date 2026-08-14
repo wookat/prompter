@@ -38,7 +38,7 @@ import {
 } from '@/lib/store'
 import { track } from '@/lib/track'
 import { COMPARISON, FAQ, FEATURES, SAMPLE, STEPS } from '@/lib/homeContent'
-import { USE_CASE_LINKS } from '@/lib/useCaseLinks'
+import { CTA_START_FREE, USE_CASE_LINKS } from '@/lib/useCaseLinks'
 import { voiceSupported } from '@/lib/voice'
 
 export default function Home() {
@@ -592,7 +592,7 @@ export default function Home() {
               href="#top"
               className="bg-primary text-primary-foreground hover:bg-primary/90 mt-8 inline-flex items-center gap-2 rounded-xl px-8 py-3.5 text-base font-bold shadow-lg"
             >
-              <Play className="size-5" /> Start prompting — it&rsquo;s free
+              <Play className="size-5" /> {CTA_START_FREE}
             </a>
           </div>
         </section>
