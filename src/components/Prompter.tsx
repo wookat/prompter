@@ -77,10 +77,13 @@ export default function Prompter({
     settingsRef.current = settings
   }, [settings])
 
+  // Scroll ends when the last line reaches the eye-line (25vh): the
+  // content's 25vh top + 80vh bottom paddings are excluded, so the
+  // distance equals the text's own height.
   const maxOffset = useCallback(() => {
     const content = contentRef.current
     if (!content) return 0
-    return Math.max(0, content.scrollHeight - window.innerHeight * 0.25)
+    return Math.max(0, content.scrollHeight - window.innerHeight * 1.05)
   }, [])
 
   const applyOffset = useCallback(() => {
@@ -136,6 +139,10 @@ export default function Prompter({
       showControls()
       return
     }
+    if (!playingRef.current && maxOffset() > 0 && offsetRef.current >= maxOffset()) {
+      showControls()
+      return
+    }
     if (playingRef.current) {
       playingRef.current = false
       setPlaying(false)
@@ -143,7 +150,7 @@ export default function Prompter({
       startPlaying()
     }
     showControls()
-  }, [countdown, cancelCountdown, startPlaying, showControls])
+  }, [countdown, cancelCountdown, maxOffset, startPlaying, showControls])
 
   const restart = useCallback(() => {
     cancelCountdown()
@@ -237,15 +244,13 @@ export default function Prompter({
         } else if (!(settingsRef.current.voice && !voiceErrorRef.current)) {
           // Pace-calibrated scroll: at speed 6 the script text takes the
           // spoken-time estimate (BASE_WPM); other speeds scale linearly.
-          // Calibrated against the text's own height (viewport padding
-          // excluded) so the effective pace matches the wpm label.
-          const textHeight =
-            (contentRef.current?.scrollHeight ?? 0) - window.innerHeight * 1.05
+          // maxOffset is the text's own height, so the pace matches the
+          // wpm label.
           const baseSecs = (wordCountRef.current / BASE_WPM) * 60
           const pace = settingsRef.current.speed / 6
           const pps =
-            baseSecs > 4 && textHeight > 0
-              ? (textHeight / baseSecs) * pace
+            baseSecs > 4 && max > 0
+              ? (max / baseSecs) * pace
               : speedToPxPerSecond(settingsRef.current.speed)
           offsetRef.current += pps * dt
         }
@@ -443,9 +448,11 @@ export default function Prompter({
       {!playing && countdown === null && (
         <div className="pointer-events-none absolute inset-x-0 bottom-[22vh] z-20 flex justify-center">
           <span className="rounded-full border border-white/25 bg-neutral-900 px-4 py-1.5 text-sm text-white shadow-lg">
-            {progress > 0
-              ? 'Paused — tap or press Space to resume'
-              : 'Tap or press Space to start'}
+            {progress >= 1
+              ? 'Finished — press R to restart · Esc to exit'
+              : progress > 0
+                ? 'Paused — tap or press Space to resume'
+                : 'Tap or press Space to start'}
           </span>
         </div>
       )}
