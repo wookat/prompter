@@ -164,10 +164,10 @@ export default function Home() {
   const [scripts, setScripts] = useState<SavedScript[]>(() => loadScripts())
   const [running, setRunning] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [importError, setImportError] = useState<string | null>(null)
+  const [editorError, setEditorError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const savedTimerRef = useRef<number | null>(null)
-  const importErrorTimerRef = useRef<number | null>(null)
+  const editorErrorTimerRef = useRef<number | null>(null)
 
   const looksBinary = (content: string) => {
     if (content.includes('\0')) return true
@@ -180,10 +180,10 @@ export default function Home() {
     return sample.length > 0 && bad / sample.length > 0.05
   }
 
-  const showImportError = (msg: string) => {
-    setImportError(msg)
-    if (importErrorTimerRef.current) window.clearTimeout(importErrorTimerRef.current)
-    importErrorTimerRef.current = window.setTimeout(() => setImportError(null), 4000)
+  const showEditorError = (msg: string) => {
+    setEditorError(msg)
+    if (editorErrorTimerRef.current) window.clearTimeout(editorErrorTimerRef.current)
+    editorErrorTimerRef.current = window.setTimeout(() => setEditorError(null), 4000)
   }
 
   const importFile = (file: File) => {
@@ -191,7 +191,7 @@ export default function Home() {
     reader.onload = () => {
       const content = typeof reader.result === 'string' ? reader.result : ''
       if (!content.trim() || looksBinary(content)) {
-        showImportError('That file doesn\u2019t look like a text script (.txt / .md).')
+        showEditorError('That file doesn\u2019t look like a text script (.txt / .md).')
         return
       }
       const unsaved =
@@ -246,8 +246,11 @@ export default function Home() {
           { id: crypto.randomUUID(), title, text, updatedAt: Date.now() },
           ...scripts,
         ].slice(0, 50)
+    if (!saveScripts(next)) {
+      showEditorError('Couldn\u2019t save \u2014 device storage is full or unavailable.')
+      return
+    }
     setScripts(next)
-    saveScripts(next)
     setSaved(true)
     if (savedTimerRef.current) window.clearTimeout(savedTimerRef.current)
     savedTimerRef.current = window.setTimeout(() => setSaved(false), 1500)
@@ -316,9 +319,9 @@ export default function Home() {
                   <Upload className="size-3.5" /> Import
                 </button>
               </div>
-              {importError && (
+              {editorError && (
                 <p className="border-b border-white/10 bg-red-500/15 px-5 py-2 text-xs text-red-300">
-                  {importError}
+                  {editorError}
                 </p>
               )}
               <textarea
