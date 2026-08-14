@@ -54,3 +54,15 @@ settings.mirrorX 存 localStorage，上次开过镜像的用户下次打开提�
 ## 修复优先级建议
 
 P1：A1、A3 · 本轮一并修：A2、A4、A6、A8 · 可下轮：A5、A7、A9、A10、A11
+
+## Verdict（审查员线上复验，2026-08-14）
+
+- A1 PASS：点 Start 后 0.7s 即见倒计时（r1v-auto-countdown.png），倒计时结束自动滚动。
+- A2 PASS：倒计时中按空格取消，回到暂停态并出现提示气泡（r1v-countdown-cancelled.png）。
+- A3 PASS：气泡改为实底+描边，可读性明显改善（同上截图）。注：气泡仍与正文有物理重叠，但实底后不再互相干扰，接受修改员保留位置的理由。
+- A4 PASS：94 词样稿实测，从滚动开始到末行到达视线区 ≈40s（与 ≈140wpm 估时一致）；整体到 progress 100% 为 58.8s，多出部分是末尾 80vh 滚出屏幕的收尾段，阅读节奏正确。
+- A6 PASS：/api/stats 现并行读 + cache-control: public, max-age=60，实测 ~0.3-0.8s。
+- A8 PASS：线上访问 /teleprompter-for-podcast 后 stats 出现 usecase_view:podcast=1；非法 slug（含 ../ 与空格）被正则丢弃不入库（事件级仍计数，可接受）。
+- A5/A7/A9/A10/A11 按约定滚入后续轮次，未复验。
+
+第 1 轮结论：6/6 修复项全部 PASS。
