@@ -98,11 +98,13 @@ export function loadScripts(): SavedScript[] {
   }
 }
 
-export function saveScripts(list: SavedScript[]): void {
+/** Returns false when storage is full or unavailable (private mode). */
+export function saveScripts(list: SavedScript[]): boolean {
   try {
     localStorage.setItem(SCRIPTS_KEY, JSON.stringify(list))
+    return true
   } catch {
-    /* ignore */
+    return false
   }
 }
 
@@ -122,21 +124,66 @@ export function saveCurrentText(text: string): void {
   }
 }
 
+/** Baseline speaking pace for CJK text, in characters per minute. */
+export const CJK_CPM = 260
+
+const CJK_CHAR =
+  /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]/
+
+let segmenter: Intl.Segmenter | null | undefined
+
+function getSegmenter(): Intl.Segmenter | null {
+  if (segmenter === undefined) {
+    try {
+      segmenter = new Intl.Segmenter(undefined, { granularity: 'word' })
+    } catch {
+      segmenter = null
+    }
+  }
+  return segmenter
+}
+
+/**
+ * Counts spoken units in any script via Intl.Segmenter: CJK counts
+ * per character (paced by CJK_CPM), everything else per word-like
+ * segment (paced by BASE_WPM). Falls back to a Latin/CJK regex on
+ * browsers without Intl.Segmenter.
+ */
+function countUnits(text: string): { words: number; cjkChars: number } {
+  const seg = getSegmenter()
+  if (seg) {
+    let words = 0
+    let cjkChars = 0
+    for (const part of seg.segment(text)) {
+      if (!part.isWordLike) continue
+      if (CJK_CHAR.test(part.segment)) cjkChars += part.segment.length
+      else words++
+    }
+    return { words, cjkChars }
+  }
+  const cjkChars = (text.match(/[\u4e00-\u9fff]/g) ?? []).length
+  const words = (
+    text.replace(/[\u4e00-\u9fff]/g, ' ').match(/[A-Za-z0-9''-]+/g) ?? []
+  ).length
+  return { words, cjkChars }
+}
+
 export function countWords(text: string): number {
-  const cjk = (text.match(/[\u4e00-\u9fff]/g) ?? []).length
-  const latin = (text.replace(/[\u4e00-\u9fff]/g, ' ').match(/[A-Za-z0-9''-]+/g) ?? [])
-    .length
-  return cjk + latin
+  const { words, cjkChars } = countUnits(text)
+  return words + cjkChars
 }
 
 /** Rough speaking time at the baseline pace */
 export function estimateSeconds(text: string): number {
-  return Math.round((countWords(text) / BASE_WPM) * 60)
+  const { words, cjkChars } = countUnits(text)
+  return Math.round((words / BASE_WPM + cjkChars / CJK_CPM) * 60)
 }
 
 export function formatDuration(totalSeconds: number): string {
-  const m = Math.floor(totalSeconds / 60)
+  const h = Math.floor(totalSeconds / 3600)
+  const m = Math.floor((totalSeconds % 3600) / 60)
   const s = totalSeconds % 60
+  if (h > 0) return m === 0 ? `${h}h` : `${h}h ${m}m`
   if (m === 0) return `${s}s`
   return s === 0 ? `${m} min` : `${m} min ${s}s`
 }

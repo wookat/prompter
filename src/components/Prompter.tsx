@@ -16,10 +16,9 @@ import {
 } from 'lucide-react'
 import { track } from '@/lib/track'
 import {
-  BASE_WPM,
   TEXT_COLORS,
   type PrompterSettings,
-  countWords,
+  estimateSeconds,
   speedToPxPerSecond,
   speedToWpm,
 } from '@/lib/store'
@@ -39,6 +38,9 @@ interface PrompterProps {
 }
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
+
+/** Above this size the initial text render takes long enough to need a loading state. */
+const LARGE_TEXT_CHARS = 100_000
 
 const coarsePointer = () => {
   try {
@@ -73,14 +75,18 @@ export default function Prompter({
   const voiceTargetRef = useRef<number | null>(null)
   const voiceErrorRef = useRef(false)
 
+  // Very large scripts block the main thread while React renders the
+  // paragraphs; paint a lightweight “Preparing…” frame first.
+  const [ready, setReady] = useState(() => text.length < LARGE_TEXT_CHARS)
+
   const touch = useMemo(() => coarsePointer(), [])
   const voiceActive = settings.voice && voiceSupported() && !voiceError
-  const wordCount = useMemo(() => countWords(text), [text])
-  const wordCountRef = useRef(wordCount)
+  const estSecs = useMemo(() => estimateSeconds(text), [text])
+  const estSecsRef = useRef(estSecs)
 
   useEffect(() => {
-    wordCountRef.current = wordCount
-  }, [wordCount])
+    estSecsRef.current = estSecs
+  }, [estSecs])
 
   useEffect(() => {
     settingsRef.current = settings
@@ -278,10 +284,9 @@ export default function Prompter({
           }
         } else if (!(settingsRef.current.voice && !voiceErrorRef.current)) {
           // Pace-calibrated scroll: at speed 6 the script text takes the
-          // spoken-time estimate (BASE_WPM); other speeds scale linearly.
-          // maxOffset is the text's own height, so the pace matches the
-          // wpm label.
-          const baseSecs = (wordCountRef.current / BASE_WPM) * 60
+          // spoken-time estimate; other speeds scale linearly. maxOffset is
+          // the text's own height, so the pace matches the wpm label.
+          const baseSecs = estSecsRef.current
           const pace = settingsRef.current.speed / 6
           const pps =
             baseSecs > 4 && max > 0
@@ -368,7 +373,6 @@ export default function Prompter({
     }
     hideTimerRef.current = window.setTimeout(() => setControlsVisible(false), 3500)
     track('prompter_start')
-    startPlaying()
     return () => {
       if (countdownTimerRef.current !== null) {
         window.clearTimeout(countdownTimerRef.current)
@@ -377,8 +381,23 @@ export default function Prompter({
         void document.exitFullscreen().catch(() => undefined)
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Render the heavy text one frame after the “Preparing…” paint, then
+  // auto-start (countdown → scroll)
+  const startedRef = useRef(false)
+  useEffect(() => {
+    if (!ready) {
+      const raf = requestAnimationFrame(() =>
+        requestAnimationFrame(() => setReady(true)),
+      )
+      return () => cancelAnimationFrame(raf)
+    }
+    if (!startedRef.current) {
+      startedRef.current = true
+      startPlaying()
+    }
+  }, [ready, startPlaying])
 
   // Wheel to seek
   useEffect(() => {
@@ -421,7 +440,10 @@ export default function Prompter({
     .join(' ')
     .trim()
 
-  const { paragraphs } = useMemo(() => tokenizeScript(text), [text])
+  const { paragraphs } = useMemo(
+    () => (ready ? tokenizeScript(text) : { paragraphs: [] }),
+    [ready, text],
+  )
 
   return (
     <div
@@ -463,24 +485,34 @@ export default function Prompter({
             color: TEXT_COLORS[settings.textColor] ?? TEXT_COLORS.white,
           }}
         >
-          {paragraphs.map((chunks, i) => (
-            <p key={i} className="mb-[1em] font-semibold tracking-wide">
-              {chunks.map((c, j) =>
-                c.wi === null ? (
-                  c.text
-                ) : (
-                  <span key={j} data-wi={c.wi}>
-                    {c.text}
-                  </span>
-                ),
-              )}
-            </p>
-          ))}
+          {ready &&
+            paragraphs.map((chunks, i) => (
+              <p key={i} className="mb-[1em] font-semibold tracking-wide">
+                {chunks.map((c, j) =>
+                  c.wi === null ? (
+                    c.text
+                  ) : (
+                    <span key={j} data-wi={c.wi}>
+                      {c.text}
+                    </span>
+                  ),
+                )}
+              </p>
+            ))}
         </div>
       </div>
 
+      {/* preparing overlay for very large scripts */}
+      {!ready && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black">
+          <span className="animate-pulse text-lg text-white/70">
+            Preparing your script…
+          </span>
+        </div>
+      )}
+
       {/* paused hint */}
-      {!playing && countdown === null && (
+      {ready && !playing && countdown === null && (
         <div className="pointer-events-none absolute inset-x-0 bottom-[22vh] z-20 flex justify-center">
           <span className="rounded-full border border-white/25 bg-neutral-900 px-4 py-1.5 text-sm text-white shadow-lg">
             {progress >= 1
@@ -534,7 +566,10 @@ export default function Prompter({
           <button
             className="rounded-xl p-2.5 hover:bg-white/10"
             onClick={() =>
-              onSettingsChange({ ...settings, speed: clamp(settings.speed - 1, 1, 20) })
+              onSettingsChange({
+                ...settings,
+                speed: clamp(settings.speed - 1, 1, 20),
+              })
             }
             aria-label="Slower"
           >
@@ -546,7 +581,10 @@ export default function Prompter({
           <button
             className="rounded-xl p-2.5 hover:bg-white/10"
             onClick={() =>
-              onSettingsChange({ ...settings, speed: clamp(settings.speed + 1, 1, 20) })
+              onSettingsChange({
+                ...settings,
+                speed: clamp(settings.speed + 1, 1, 20),
+              })
             }
             aria-label="Faster"
           >
@@ -586,7 +624,9 @@ export default function Prompter({
                 setVoiceError(false)
                 onSettingsChange({ ...settings, voice: !settings.voice })
               }}
-              aria-label={settings.voice ? 'Disable voice follow' : 'Enable voice follow'}
+              aria-label={
+                settings.voice ? 'Disable voice follow' : 'Enable voice follow'
+              }
               title="Voice follow — the scroll tracks your reading"
             >
               {settings.voice && !voiceError ? (
