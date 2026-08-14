@@ -34,3 +34,14 @@ C2③（首页预渲染/CLS）、A5+C4（KV 竞态）、A11（镜像提示）；
 ## 修复优先级建议
 
 本轮修：E1、E2（含 A10）· 顺手：E4 · 论证后做：E3（感知优化即可）
+
+---
+
+## Verdict（线上复验 2026-08-14，bundle index-YEuYiHML.js）
+
+- **E1: PASS** — 配额占满（QuotaExceededError）后点 Save：不出现 Saved 态、列表未新增，红色错误条「Couldn't save — device storage is full or unavailable.」（截图 r5v-quota-error.png）。
+- **E2: PASS** — 阿语 10 词句「10 words · ≈4s」（原 3 words·≈1s）；250 汉字「250 words · ≈58s」（≈260字/分，A10 一并关闭）。
+- **E3: PASS** — 200k 词点击 Start 后 0.08s 即出现「Preparing your script…」覆盖层（截图 r5v-preparing.png），随后倒计时并正常滚动。
+- **E4: PASS** — 超长稿估时显示「≈ 23h 48m spoken」。
+
+结论：4/4 PASS（A10 随 E2 关闭）。挂账：C2③、A5+C4、A11。
