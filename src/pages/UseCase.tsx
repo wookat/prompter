@@ -4,7 +4,7 @@ import { ArrowRight, Check, Lightbulb } from 'lucide-react'
 import { SiteFooter, SiteHeader } from '@/components/Layout'
 import { Button } from '@/components/ui/button'
 import { track } from '@/lib/track'
-import { USE_CASES } from '@/lib/useCases'
+import { CTA_START_FREE, USE_CASES } from '@/lib/useCases'
 
 export default function UseCase() {
   const { pathname } = useLocation()
@@ -49,9 +49,44 @@ export default function UseCase() {
           <p className="text-sm leading-relaxed">{useCase.tip}</p>
         </div>
 
+        {useCase.sections?.map((s) => (
+          <section key={s.h2} className="mt-10">
+            <h2 className="text-xl font-extrabold tracking-tight sm:text-2xl">{s.h2}</h2>
+            {s.paragraphs.map((p) => (
+              <p key={p} className="text-muted-foreground mt-4 text-sm leading-relaxed sm:text-base">
+                {p}
+              </p>
+            ))}
+          </section>
+        ))}
+
+        {useCase.faq && (
+          <section className="mt-10">
+            <h2 className="text-xl font-extrabold tracking-tight sm:text-2xl">
+              Frequently asked questions
+            </h2>
+            <div className="mt-4 space-y-3">
+              {useCase.faq.map((f) => (
+                <details key={f.q} className="group rounded-2xl border px-5 py-4 open:shadow-sm">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold [&::-webkit-details-marker]:hidden">
+                    {f.q}
+                    <span
+                      className="text-muted-foreground transition-transform group-open:rotate-45"
+                      aria-hidden
+                    >
+                      +
+                    </span>
+                  </summary>
+                  <p className="text-muted-foreground mt-3 text-sm leading-relaxed">{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
+
         <Button asChild size="lg" className="mt-8 font-bold shadow-md">
           <Link to="/">
-            Start prompting — it&rsquo;s free <ArrowRight />
+            {CTA_START_FREE} <ArrowRight />
           </Link>
         </Button>
 

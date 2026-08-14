@@ -3,9 +3,9 @@
  * chunk and the build-time SEO script — keep it out of the main bundle.
  * Navigation link data (slug/path/name) lives in useCaseLinks.ts.
  */
-import { SITE, USE_CASE_LINKS, type UseCaseLink } from './useCaseLinks.ts'
+import { CTA_START_FREE, SITE, USE_CASE_LINKS, type UseCaseLink } from './useCaseLinks.ts'
 
-export { SITE }
+export { CTA_START_FREE, SITE }
 
 export interface UseCase extends UseCaseLink {
   title: string
@@ -14,6 +14,10 @@ export interface UseCase extends UseCaseLink {
   intro: string
   bullets: string[]
   tip: string
+  /** Optional in-depth guide sections — unique, non-template page content */
+  sections?: { h2: string; paragraphs: string[] }[]
+  /** Optional page-specific FAQ (also emitted as FAQPage JSON-LD at build) */
+  faq?: { q: string; a: string }[]
 }
 
 type UseCaseContent = Omit<UseCase, 'path' | 'name' | 'blurb'>
@@ -34,6 +38,37 @@ const CONTENT: UseCaseContent[] = [
       'Your speech stays on your device — nothing is uploaded',
     ],
     tip: 'Still writing the speech? Our sister tool SpeakEasy drafts a personal wedding speech from your real stories: https://speech.zalize.com',
+    sections: [
+      {
+        h2: 'How to set up the teleprompter for a wedding speech',
+        paragraphs: [
+          'Paste your speech and check the estimated speaking time in the editor header. The sweet spot for a best-man or maid-of-honour speech is three to five minutes — roughly 400 to 700 words. If the estimate reads longer than five minutes, cut before you rehearse: a shorter speech read calmly always lands better than a long one read fast.',
+          'Set the speed lower than feels natural — around 110–130 words per minute instead of normal conversational pace. Wedding rooms are loud, guests react, and you will want to look up between lines. A slower scroll gives you that slack without losing your place. Bump the text size until you can read it comfortably with the phone held at waist height, so you are not visibly staring at a screen.',
+          'Turn the countdown up to five or more seconds. That pause before the text moves is your moment to take a breath, look at the couple, and start on your own terms rather than chasing the scroll.',
+        ],
+      },
+      {
+        h2: 'On the day: phone in hand, eyes on the room',
+        paragraphs: [
+          'Rehearse at least three full runs at final speed — the first run tells you the pace is wrong, the second fixes it, the third makes it automatic. Practice tapping to pause where you expect laughter or an “aww”; resuming from a pause is one tap, so pausing generously costs nothing.',
+          'On the day, load the speech before the reception (the page works offline once open), set the screen brightness high, and enable the phone’s do-not-disturb. Hold the phone like notes — nobody expects a speaker to be empty-handed — and glance down at the eye-line marker, not at the whole screen. The marker always holds your current line, so a glance is enough.',
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: 'How long should a wedding speech be?',
+        a: 'Three to five minutes — about 400–700 words at a calm pace. PromptCue shows the estimated speaking time as you paste, so you can trim before you rehearse.',
+      },
+      {
+        q: 'Is it okay to read a wedding speech from a phone?',
+        a: 'Yes — guests expect notes. A slow teleprompter scroll on a phone actually reads as more natural than paper, because you glance instead of shuffling pages, and one tap pauses while the room reacts.',
+      },
+      {
+        q: 'What if I get interrupted by laughter or applause?',
+        a: 'Tap anywhere to pause the scroll, and tap again to resume exactly where you left off. Rehearse the pause points so it feels automatic on the day.',
+      },
+    ],
   },
   {
     slug: 'presentation',
@@ -66,6 +101,38 @@ const CONTENT: UseCaseContent[] = [
       'Restart a take instantly with one key (R)',
     ],
     tip: 'Position the text as close to the camera lens as possible and keep the font just large enough to read — smaller text keeps your eye movement invisible.',
+    sections: [
+      {
+        h2: 'Camera setup: keep your eyes near the lens',
+        paragraphs: [
+          'The single biggest factor in a natural on-camera read is the distance between the text and the lens. Shrink your browser window to a narrow column and dock it directly under (or beside) the camera — within about 10° of the lens axis, eye movement is invisible at typical vlogging distance. On a laptop, that means the top-centre of the screen, right below the built-in webcam.',
+          'Then shrink the font. Big text feels easier to read, but it forces your eyes to travel further per line, which shows up on camera as a visible left-right sweep. Use the smallest size you can read at a glance and keep the window narrow — short lines keep your gaze effectively still.',
+          'If you record with a beam-splitter rig, enable Mirror H and the text reads correctly through the glass. Both horizontal and vertical mirroring are built in, and a status pill reminds you when a mirror mode is active.',
+        ],
+      },
+      {
+        h2: 'A workflow for clean takes',
+        paragraphs: [
+          'Calibrate speed before the first take: read one paragraph aloud and adjust until the eye-line marker tracks your voice, then leave it alone — consistent pace across takes makes editing dramatically easier, because every take of a section runs the same length.',
+          'Flubbed a line? Press R and the script restarts instantly from the top for a fresh take, or drag the text back a paragraph and re-enter from just before the mistake. Space pauses between sections so you can check framing or notes without losing your place. There is no watermark on the scrolling view, so nothing branded ever appears in a screen recording.',
+          'Write for the ear, not the page: short sentences, contractions, and a blank line between beats. The prompter preserves your paragraph spacing, and those visual breaks double as natural places to breathe and reset your energy.',
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: 'How do I stop my eyes from visibly reading on camera?',
+        a: 'Move the text as close to the lens as possible, make the window narrow, and use a smaller font. Short lines near the lens keep eye travel below what viewers can perceive.',
+      },
+      {
+        q: 'Does PromptCue work with a beam-splitter teleprompter rig?',
+        a: 'Yes — Mirror H flips the text horizontally for the glass, and Mirror V handles rigs that also invert vertically. Press M or V to toggle while prompting.',
+      },
+      {
+        q: 'Will a watermark appear in my recording?',
+        a: 'No. The scrolling view is completely unbranded — no watermark, no logo overlay — so you can screen-record or point a camera at it freely.',
+      },
+    ],
   },
   {
     slug: 'podcast',
