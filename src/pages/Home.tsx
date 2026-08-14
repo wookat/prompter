@@ -41,7 +41,7 @@ import {
   speedToWpm,
 } from '@/lib/store'
 import { track } from '@/lib/track'
-import { USE_CASES } from '@/lib/useCases'
+import { USE_CASE_LINKS } from '@/lib/useCaseLinks'
 import { voiceSupported } from '@/lib/voice'
 
 const SAMPLE = `Welcome to PromptCue, your free online teleprompter.
@@ -75,7 +75,7 @@ const FAQ = [
   },
   {
     q: 'What keyboard shortcuts are there?',
-    a: 'Space plays and pauses. Up/Down arrows change speed. Left/Right arrows change text size. M toggles horizontal mirror, V vertical. R restarts. Esc exits.',
+    a: 'Space plays and pauses. Up/Down arrows change speed. Left/Right arrows change text size. M toggles Mirror H (horizontal), V toggles Mirror V (vertical). R restarts. Esc exits.',
   },
   {
     q: 'How do I estimate how long my script takes to read?',
@@ -152,7 +152,7 @@ const COMPARISON: { label: string; us: string | boolean; them: string | boolean 
   { label: 'Watermark on output', us: false, them: 'Often on free plan' },
   { label: 'Script privacy', us: 'Never leaves your device', them: 'Uploaded to cloud' },
   { label: 'Word / script limit', us: 'Unlimited', them: 'Limited on free plan' },
-  { label: 'Mirror & flip modes', us: true, them: true },
+  { label: 'Mirror modes (H & V)', us: true, them: true },
   { label: 'Voice-follow scrolling', us: true, them: 'Paid feature' },
   { label: 'Countdown + eye-line guide', us: true, them: 'Varies' },
   { label: 'Works without install', us: true, them: 'App download required' },
@@ -163,16 +163,52 @@ export default function Home() {
   const [settings, setSettings] = useState<PrompterSettings>(() => loadSettings())
   const [scripts, setScripts] = useState<SavedScript[]>(() => loadScripts())
   const [running, setRunning] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [editorError, setEditorError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const savedTimerRef = useRef<number | null>(null)
+  const editorErrorTimerRef = useRef<number | null>(null)
+
+  const looksBinary = (content: string) => {
+    if (content.includes('\0')) return true
+    const sample = content.slice(0, 2000)
+    let bad = 0
+    for (const ch of sample) {
+      const c = ch.codePointAt(0) ?? 0
+      if (c === 0xfffd || (c < 32 && c !== 9 && c !== 10 && c !== 13)) bad++
+    }
+    return sample.length > 0 && bad / sample.length > 0.05
+  }
+
+  const showEditorError = (msg: string) => {
+    setEditorError(msg)
+    if (editorErrorTimerRef.current) window.clearTimeout(editorErrorTimerRef.current)
+    editorErrorTimerRef.current = window.setTimeout(() => setEditorError(null), 4000)
+  }
 
   const importFile = (file: File) => {
     const reader = new FileReader()
     reader.onload = () => {
       const content = typeof reader.result === 'string' ? reader.result : ''
-      if (content.trim()) {
-        setText(content)
-        track('script_import')
+      if (!content.trim() || looksBinary(content)) {
+        showEditorError('That file doesn\u2019t look like a text script (.txt / .md).')
+        return
       }
+      const unsaved =
+        text.trim() &&
+        text !== SAMPLE &&
+        text !== content &&
+        !scripts.some((s) => s.text === text)
+      if (
+        unsaved &&
+        !window.confirm(
+          'Replace your current script with the imported file? Your current text is not saved.',
+        )
+      ) {
+        return
+      }
+      setText(content)
+      track('script_import')
     }
     reader.readAsText(file)
   }
@@ -195,17 +231,29 @@ export default function Home() {
 
   const saveScript = () => {
     if (!text.trim()) return
+    const firstLine = text.trim().split('\n')[0].trim()
     const title =
-      text
-        .trim()
-        .split('\n')[0]
-        .slice(0, 60) || 'Untitled script'
-    const next: SavedScript[] = [
-      { id: crypto.randomUUID(), title, text, updatedAt: Date.now() },
-      ...scripts,
-    ].slice(0, 50)
+      firstLine.length <= 60
+        ? firstLine || 'Untitled script'
+        : `${(firstLine.slice(0, 60).replace(/\s+\S*$/, '') || firstLine.slice(0, 59)).trimEnd()}…`
+    const existing = scripts.find((s) => s.text === text)
+    const next: SavedScript[] = existing
+      ? [
+          { ...existing, title, updatedAt: Date.now() },
+          ...scripts.filter((s) => s.id !== existing.id),
+        ]
+      : [
+          { id: crypto.randomUUID(), title, text, updatedAt: Date.now() },
+          ...scripts,
+        ].slice(0, 50)
+    if (!saveScripts(next)) {
+      showEditorError('Couldn\u2019t save \u2014 device storage is full or unavailable.')
+      return
+    }
     setScripts(next)
-    saveScripts(next)
+    setSaved(true)
+    if (savedTimerRef.current) window.clearTimeout(savedTimerRef.current)
+    savedTimerRef.current = window.setTimeout(() => setSaved(false), 1500)
     track('script_save')
   }
 
@@ -271,6 +319,11 @@ export default function Home() {
                   <Upload className="size-3.5" /> Import
                 </button>
               </div>
+              {editorError && (
+                <p className="border-b border-white/10 bg-red-500/15 px-5 py-2 text-xs text-red-300">
+                  {editorError}
+                </p>
+              )}
               <textarea
                 aria-label="Your script"
                 value={text}
@@ -283,6 +336,8 @@ export default function Home() {
                   Autosaved locally — nothing is uploaded · Need a script?{' '}
                   <a
                     href="https://speech.zalize.com"
+                    target="_blank"
+                    rel="noopener"
                     className="underline hover:text-white/70"
                   >
                     Try SpeakEasy
@@ -312,7 +367,7 @@ export default function Home() {
                   onChange={(e) =>
                     updateSettings({ ...settings, speed: Number(e.target.value) })
                   }
-                  className="accent-primary mt-1.5 w-full"
+                  className="accent-primary mt-1.5 h-8 w-full"
                 />
               </div>
               <div>
@@ -334,7 +389,7 @@ export default function Home() {
                   onChange={(e) =>
                     updateSettings({ ...settings, fontSize: Number(e.target.value) })
                   }
-                  className="accent-primary mt-1.5 w-full"
+                  className="accent-primary mt-1.5 h-8 w-full"
                 />
               </div>
               <div>
@@ -355,7 +410,7 @@ export default function Home() {
                   onChange={(e) =>
                     updateSettings({ ...settings, countdown: Number(e.target.value) })
                   }
-                  className="accent-primary mt-1.5 w-full"
+                  className="accent-primary mt-1.5 h-8 w-full"
                 />
               </div>
               <div className="flex flex-wrap gap-2">
@@ -368,7 +423,7 @@ export default function Home() {
                     updateSettings({ ...settings, mirrorX: !settings.mirrorX })
                   }}
                 >
-                  <FlipHorizontal2 /> Mirror
+                  <FlipHorizontal2 /> Mirror H
                 </Button>
                 <Button
                   type="button"
@@ -378,7 +433,7 @@ export default function Home() {
                     updateSettings({ ...settings, mirrorY: !settings.mirrorY })
                   }
                 >
-                  <FlipVertical2 /> Flip
+                  <FlipVertical2 /> Mirror V
                 </Button>
                 <Button
                   type="button"
@@ -458,7 +513,15 @@ export default function Home() {
                   disabled={!text.trim()}
                   onClick={saveScript}
                 >
-                  <Save /> Save script
+                  {saved ? (
+                    <>
+                      <Check className="text-emerald-600" /> Saved
+                    </>
+                  ) : (
+                    <>
+                      <Save /> Save script
+                    </>
+                  )}
                 </Button>
               </div>
 
@@ -599,7 +662,7 @@ export default function Home() {
             Guides for getting the most out of a browser teleprompter in your situation.
           </p>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {USE_CASES.map((u) => (
+            {USE_CASE_LINKS.map((u) => (
               <Link
                 key={u.slug}
                 to={u.path}
@@ -607,7 +670,7 @@ export default function Home() {
               >
                 <h3 className="text-sm font-bold">{u.name}</h3>
                 <p className="text-muted-foreground mt-1.5 line-clamp-3 text-xs leading-relaxed">
-                  {u.intro}
+                  {u.blurb}
                 </p>
               </Link>
             ))}

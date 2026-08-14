@@ -22,8 +22,8 @@ const esc = (s) =>
     .replaceAll('"', '&quot;')
 
 const assets = readdirSync(path.join(OUT_DIR, 'assets'))
-const jsFile = assets.find((f) => f.endsWith('.js'))
-const cssFile = assets.find((f) => f.endsWith('.css'))
+const jsFile = assets.find((f) => f.startsWith('index-') && f.endsWith('.js'))
+const cssFile = assets.find((f) => f.startsWith('index-') && f.endsWith('.css'))
 
 function pageHtml(u) {
   const url = `${SITE}${u.path}`
@@ -51,6 +51,10 @@ function pageHtml(u) {
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" /></noscript>
     <title>${esc(u.title)}</title>
     <meta name="description" content="${esc(u.description)}" />
     <link rel="canonical" href="${url}" />
@@ -58,6 +62,11 @@ function pageHtml(u) {
     <meta property="og:title" content="${esc(u.title)}" />
     <meta property="og:description" content="${esc(u.description)}" />
     <meta property="og:url" content="${url}" />
+    <meta property="og:image" content="${SITE}/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="${SITE}/og.png" />
     <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
     <script type="application/ld+json">${JSON.stringify(breadcrumbs)}</script>
     <script type="module" crossorigin src="/assets/${jsFile}"></script>

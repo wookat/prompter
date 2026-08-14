@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation } from 'react-router-dom'
 import { ArrowRight, Check, Lightbulb } from 'lucide-react'
 import { SiteFooter, SiteHeader } from '@/components/Layout'
 import { Button } from '@/components/ui/button'
+import { track } from '@/lib/track'
 import { USE_CASES } from '@/lib/useCases'
 
 export default function UseCase() {
@@ -10,7 +11,10 @@ export default function UseCase() {
   const useCase = USE_CASES.find((u) => u.path === pathname)
 
   useEffect(() => {
-    if (useCase) document.title = useCase.title
+    if (useCase) {
+      document.title = useCase.title
+      track('usecase_view', useCase.slug)
+    }
     return () => {
       document.title =
         'Free Online Teleprompter — No Signup, No Watermark | PromptCue'
@@ -47,7 +51,7 @@ export default function UseCase() {
 
         <Button asChild size="lg" className="mt-8 font-bold shadow-md">
           <Link to="/">
-            Open the free teleprompter <ArrowRight />
+            Start prompting — it&rsquo;s free <ArrowRight />
           </Link>
         </Button>
 

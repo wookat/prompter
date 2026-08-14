@@ -16,10 +16,9 @@ import {
 } from 'lucide-react'
 import { track } from '@/lib/track'
 import {
-  BASE_WPM,
   TEXT_COLORS,
   type PrompterSettings,
-  countWords,
+  estimateSeconds,
   speedToPxPerSecond,
   speedToWpm,
 } from '@/lib/store'
@@ -40,6 +39,17 @@ interface PrompterProps {
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
 
+/** Above this size the initial text render takes long enough to need a loading state. */
+const LARGE_TEXT_CHARS = 100_000
+
+const coarsePointer = () => {
+  try {
+    return window.matchMedia('(pointer: coarse)').matches
+  } catch {
+    return false
+  }
+}
+
 export default function Prompter({
   text,
   settings,
@@ -59,27 +69,36 @@ export default function Prompter({
   const settingsRef = useRef(settings)
   const finishedRef = useRef(false)
   const hideTimerRef = useRef<number | null>(null)
+  const countdownTimerRef = useRef<number | null>(null)
   const dragRef = useRef<{ y: number; offset: number; moved: boolean } | null>(null)
   const matchIdxRef = useRef(-1)
   const voiceTargetRef = useRef<number | null>(null)
   const voiceErrorRef = useRef(false)
 
+  // Very large scripts block the main thread while React renders the
+  // paragraphs; paint a lightweight “Preparing…” frame first.
+  const [ready, setReady] = useState(() => text.length < LARGE_TEXT_CHARS)
+
+  const touch = useMemo(() => coarsePointer(), [])
   const voiceActive = settings.voice && voiceSupported() && !voiceError
-  const wordCount = useMemo(() => countWords(text), [text])
-  const wordCountRef = useRef(wordCount)
+  const estSecs = useMemo(() => estimateSeconds(text), [text])
+  const estSecsRef = useRef(estSecs)
 
   useEffect(() => {
-    wordCountRef.current = wordCount
-  }, [wordCount])
+    estSecsRef.current = estSecs
+  }, [estSecs])
 
   useEffect(() => {
     settingsRef.current = settings
   }, [settings])
 
+  // Scroll ends when the last line reaches the eye-line (25vh): the
+  // content's 25vh top + 80vh bottom paddings are excluded, so the
+  // distance equals the text's own height.
   const maxOffset = useCallback(() => {
     const content = contentRef.current
     if (!content) return 0
-    return Math.max(0, content.scrollHeight - window.innerHeight * 0.25)
+    return Math.max(0, content.scrollHeight - window.innerHeight * 1.05)
   }, [])
 
   const applyOffset = useCallback(() => {
@@ -105,23 +124,40 @@ export default function Prompter({
       const tick = () => {
         left -= 1
         if (left <= 0) {
+          countdownTimerRef.current = null
           setCountdown(null)
           playingRef.current = true
           setPlaying(true)
         } else {
           setCountdown(left)
-          window.setTimeout(tick, 1000)
+          countdownTimerRef.current = window.setTimeout(tick, 1000)
         }
       }
-      window.setTimeout(tick, 1000)
+      countdownTimerRef.current = window.setTimeout(tick, 1000)
     } else {
       playingRef.current = true
       setPlaying(true)
     }
   }, [])
 
+  const cancelCountdown = useCallback(() => {
+    if (countdownTimerRef.current !== null) {
+      window.clearTimeout(countdownTimerRef.current)
+      countdownTimerRef.current = null
+    }
+    setCountdown(null)
+  }, [])
+
   const togglePlay = useCallback(() => {
-    if (countdown !== null) return
+    if (countdown !== null) {
+      cancelCountdown()
+      showControls()
+      return
+    }
+    if (!playingRef.current && maxOffset() > 0 && offsetRef.current >= maxOffset()) {
+      showControls()
+      return
+    }
     if (playingRef.current) {
       playingRef.current = false
       setPlaying(false)
@@ -129,9 +165,10 @@ export default function Prompter({
       startPlaying()
     }
     showControls()
-  }, [countdown, startPlaying, showControls])
+  }, [countdown, cancelCountdown, maxOffset, startPlaying, showControls])
 
   const restart = useCallback(() => {
+    cancelCountdown()
     playingRef.current = false
     setPlaying(false)
     finishedRef.current = false
@@ -140,7 +177,7 @@ export default function Prompter({
     voiceTargetRef.current = null
     applyOffset()
     showControls()
-  }, [applyOffset, showControls])
+  }, [applyOffset, cancelCountdown, showControls])
 
   // Voice-follow: browser speech recognition drives the scroll target
   useEffect(() => {
@@ -204,6 +241,32 @@ export default function Prompter({
     }
   }, [voiceActive, playing, text])
 
+  // Keep the screen awake while scrolling (phone propped next to the camera)
+  useEffect(() => {
+    if (!playing || !('wakeLock' in navigator)) return
+    let lock: WakeLockSentinel | null = null
+    let active = true
+    const acquire = () => {
+      navigator.wakeLock
+        .request('screen')
+        .then((l) => {
+          if (active) lock = l
+          else void l.release().catch(() => undefined)
+        })
+        .catch(() => undefined)
+    }
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') acquire()
+    }
+    acquire()
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      active = false
+      document.removeEventListener('visibilitychange', onVisibility)
+      void lock?.release().catch(() => undefined)
+    }
+  }, [playing])
+
   // Scroll loop
   useEffect(() => {
     let raf = 0
@@ -220,9 +283,10 @@ export default function Prompter({
             offsetRef.current += delta * Math.min(1, dt * 3)
           }
         } else if (!(settingsRef.current.voice && !voiceErrorRef.current)) {
-          // Pace-calibrated scroll: at speed 6 the full script takes the
-          // spoken-time estimate (BASE_WPM); other speeds scale linearly.
-          const baseSecs = (wordCountRef.current / BASE_WPM) * 60
+          // Pace-calibrated scroll: at speed 6 the script text takes the
+          // spoken-time estimate; other speeds scale linearly. maxOffset is
+          // the text's own height, so the pace matches the wpm label.
+          const baseSecs = estSecsRef.current
           const pace = settingsRef.current.speed / 6
           const pps =
             baseSecs > 4 && max > 0
@@ -301,7 +365,7 @@ export default function Prompter({
     return () => window.removeEventListener('keydown', onKey)
   }, [togglePlay, restart, onClose, onSettingsChange, showControls])
 
-  // Fullscreen on open, restore on close
+  // Fullscreen on open, auto-start (countdown → scroll), restore on close
   useEffect(() => {
     const el = rootRef.current
     if (el?.requestFullscreen) {
@@ -310,11 +374,30 @@ export default function Prompter({
     hideTimerRef.current = window.setTimeout(() => setControlsVisible(false), 3500)
     track('prompter_start')
     return () => {
+      if (countdownTimerRef.current !== null) {
+        window.clearTimeout(countdownTimerRef.current)
+      }
       if (document.fullscreenElement) {
         void document.exitFullscreen().catch(() => undefined)
       }
     }
   }, [])
+
+  // Render the heavy text one frame after the “Preparing…” paint, then
+  // auto-start (countdown → scroll)
+  const startedRef = useRef(false)
+  useEffect(() => {
+    if (!ready) {
+      const raf = requestAnimationFrame(() =>
+        requestAnimationFrame(() => setReady(true)),
+      )
+      return () => cancelAnimationFrame(raf)
+    }
+    if (!startedRef.current) {
+      startedRef.current = true
+      startPlaying()
+    }
+  }, [ready, startPlaying])
 
   // Wheel to seek
   useEffect(() => {
@@ -357,7 +440,10 @@ export default function Prompter({
     .join(' ')
     .trim()
 
-  const { paragraphs } = useMemo(() => tokenizeScript(text), [text])
+  const { paragraphs } = useMemo(
+    () => (ready ? tokenizeScript(text) : { paragraphs: [] }),
+    [ready, text],
+  )
 
   return (
     <div
@@ -399,29 +485,47 @@ export default function Prompter({
             color: TEXT_COLORS[settings.textColor] ?? TEXT_COLORS.white,
           }}
         >
-          {paragraphs.map((chunks, i) => (
-            <p key={i} className="mb-[1em] font-semibold tracking-wide">
-              {chunks.map((c, j) =>
-                c.wi === null ? (
-                  c.text
-                ) : (
-                  <span key={j} data-wi={c.wi}>
-                    {c.text}
-                  </span>
-                ),
-              )}
-            </p>
-          ))}
+          {ready &&
+            paragraphs.map((chunks, i) => (
+              <p key={i} className="mb-[1em] font-semibold tracking-wide">
+                {chunks.map((c, j) =>
+                  c.wi === null ? (
+                    c.text
+                  ) : (
+                    <span key={j} data-wi={c.wi}>
+                      {c.text}
+                    </span>
+                  ),
+                )}
+              </p>
+            ))}
         </div>
       </div>
 
+      {/* preparing overlay for very large scripts */}
+      {!ready && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black">
+          <span className="animate-pulse text-lg text-white/70">
+            Preparing your script…
+          </span>
+        </div>
+      )}
+
       {/* paused hint */}
-      {!playing && countdown === null && (
+      {ready && !playing && countdown === null && (
         <div className="pointer-events-none absolute inset-x-0 bottom-[22vh] z-20 flex justify-center">
-          <span className="rounded-full bg-black/70 px-4 py-1.5 text-sm text-white/80">
-            {progress > 0
-              ? 'Paused — tap or press Space to resume'
-              : 'Tap or press Space to start'}
+          <span className="rounded-full border border-white/25 bg-neutral-900 px-4 py-1.5 text-sm text-white shadow-lg">
+            {progress >= 1
+              ? touch
+                ? 'Finished — tap ↻ to restart or ✕ to exit'
+                : 'Finished — press R to restart · Esc to exit'
+              : progress > 0
+                ? touch
+                  ? 'Paused — tap to resume'
+                  : 'Paused — tap or press Space to resume'
+                : touch
+                  ? 'Tap to start'
+                  : 'Tap or press Space to start'}
           </span>
         </div>
       )}
@@ -437,7 +541,9 @@ export default function Prompter({
       <div
         data-controls
         className={`absolute right-0 bottom-0 left-0 z-30 transition-opacity duration-300 ${
-          controlsVisible ? 'opacity-100' : 'pointer-events-none opacity-0'
+          controlsVisible || (progress >= 1 && !playing)
+            ? 'opacity-100'
+            : 'pointer-events-none opacity-0'
         }`}
         onPointerDown={(e) => e.stopPropagation()}
       >
@@ -460,7 +566,10 @@ export default function Prompter({
           <button
             className="rounded-xl p-2.5 hover:bg-white/10"
             onClick={() =>
-              onSettingsChange({ ...settings, speed: clamp(settings.speed - 1, 1, 20) })
+              onSettingsChange({
+                ...settings,
+                speed: clamp(settings.speed - 1, 1, 20),
+              })
             }
             aria-label="Slower"
           >
@@ -472,7 +581,10 @@ export default function Prompter({
           <button
             className="rounded-xl p-2.5 hover:bg-white/10"
             onClick={() =>
-              onSettingsChange({ ...settings, speed: clamp(settings.speed + 1, 1, 20) })
+              onSettingsChange({
+                ...settings,
+                speed: clamp(settings.speed + 1, 1, 20),
+              })
             }
             aria-label="Faster"
           >
@@ -512,7 +624,9 @@ export default function Prompter({
                 setVoiceError(false)
                 onSettingsChange({ ...settings, voice: !settings.voice })
               }}
-              aria-label={settings.voice ? 'Disable voice follow' : 'Enable voice follow'}
+              aria-label={
+                settings.voice ? 'Disable voice follow' : 'Enable voice follow'
+              }
               title="Voice follow — the scroll tracks your reading"
             >
               {settings.voice && !voiceError ? (
@@ -528,7 +642,7 @@ export default function Prompter({
               if (!settings.mirrorX) track('mirror_on')
               onSettingsChange({ ...settings, mirrorX: !settings.mirrorX })
             }}
-            aria-label="Mirror horizontally"
+            aria-label="Mirror H (horizontal)"
           >
             <FlipHorizontal2 className="size-5" />
           </button>
@@ -538,7 +652,7 @@ export default function Prompter({
               if (!settings.mirrorY) track('mirror_on')
               onSettingsChange({ ...settings, mirrorY: !settings.mirrorY })
             }}
-            aria-label="Mirror vertically"
+            aria-label="Mirror V (vertical)"
           >
             <FlipVertical2 className="size-5" />
           </button>
@@ -556,8 +670,14 @@ export default function Prompter({
         </p>
       </div>
 
-      {/* voice status */}
-      <div className="pointer-events-none absolute top-3 left-1/2 z-30 -translate-x-1/2">
+      {/* status pills (rendered outside the mirrored transform so they stay readable) */}
+      <div className="pointer-events-none absolute top-3 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-1.5">
+        {(settings.mirrorX || settings.mirrorY) && (
+          <span className="rounded-full bg-black/70 px-3 py-1 text-xs text-white/80">
+            Mirror {settings.mirrorX && settings.mirrorY ? 'H+V' : settings.mirrorX ? 'H' : 'V'} on
+            {touch ? ' \u2014 tap \u21c4 to turn off' : ' \u2014 press M/V to toggle'}
+          </span>
+        )}
         {voiceActive && playing && (
           <span className="flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1 text-xs text-white/80">
             <Mic className="text-primary size-3.5 animate-pulse" /> Voice follow —

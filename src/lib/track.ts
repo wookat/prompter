@@ -6,13 +6,14 @@ export type TrackEvent =
   | 'script_import'
   | 'mirror_on'
   | 'voice_on'
+  | 'usecase_view'
 
-export function track(event: TrackEvent): void {
+export function track(event: TrackEvent, slug?: string): void {
   try {
     void fetch('/api/track', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ event }),
+      body: JSON.stringify(slug ? { event, slug } : { event }),
       keepalive: true,
     }).catch(() => undefined)
   } catch {
