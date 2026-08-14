@@ -59,6 +59,7 @@ export default function Prompter({
   const settingsRef = useRef(settings)
   const finishedRef = useRef(false)
   const hideTimerRef = useRef<number | null>(null)
+  const countdownTimerRef = useRef<number | null>(null)
   const dragRef = useRef<{ y: number; offset: number; moved: boolean } | null>(null)
   const matchIdxRef = useRef(-1)
   const voiceTargetRef = useRef<number | null>(null)
@@ -105,23 +106,36 @@ export default function Prompter({
       const tick = () => {
         left -= 1
         if (left <= 0) {
+          countdownTimerRef.current = null
           setCountdown(null)
           playingRef.current = true
           setPlaying(true)
         } else {
           setCountdown(left)
-          window.setTimeout(tick, 1000)
+          countdownTimerRef.current = window.setTimeout(tick, 1000)
         }
       }
-      window.setTimeout(tick, 1000)
+      countdownTimerRef.current = window.setTimeout(tick, 1000)
     } else {
       playingRef.current = true
       setPlaying(true)
     }
   }, [])
 
+  const cancelCountdown = useCallback(() => {
+    if (countdownTimerRef.current !== null) {
+      window.clearTimeout(countdownTimerRef.current)
+      countdownTimerRef.current = null
+    }
+    setCountdown(null)
+  }, [])
+
   const togglePlay = useCallback(() => {
-    if (countdown !== null) return
+    if (countdown !== null) {
+      cancelCountdown()
+      showControls()
+      return
+    }
     if (playingRef.current) {
       playingRef.current = false
       setPlaying(false)
@@ -129,9 +143,10 @@ export default function Prompter({
       startPlaying()
     }
     showControls()
-  }, [countdown, startPlaying, showControls])
+  }, [countdown, cancelCountdown, startPlaying, showControls])
 
   const restart = useCallback(() => {
+    cancelCountdown()
     playingRef.current = false
     setPlaying(false)
     finishedRef.current = false
@@ -140,7 +155,7 @@ export default function Prompter({
     voiceTargetRef.current = null
     applyOffset()
     showControls()
-  }, [applyOffset, showControls])
+  }, [applyOffset, cancelCountdown, showControls])
 
   // Voice-follow: browser speech recognition drives the scroll target
   useEffect(() => {
@@ -220,13 +235,17 @@ export default function Prompter({
             offsetRef.current += delta * Math.min(1, dt * 3)
           }
         } else if (!(settingsRef.current.voice && !voiceErrorRef.current)) {
-          // Pace-calibrated scroll: at speed 6 the full script takes the
+          // Pace-calibrated scroll: at speed 6 the script text takes the
           // spoken-time estimate (BASE_WPM); other speeds scale linearly.
+          // Calibrated against the text's own height (viewport padding
+          // excluded) so the effective pace matches the wpm label.
+          const textHeight =
+            (contentRef.current?.scrollHeight ?? 0) - window.innerHeight * 1.05
           const baseSecs = (wordCountRef.current / BASE_WPM) * 60
           const pace = settingsRef.current.speed / 6
           const pps =
-            baseSecs > 4 && max > 0
-              ? (max / baseSecs) * pace
+            baseSecs > 4 && textHeight > 0
+              ? (textHeight / baseSecs) * pace
               : speedToPxPerSecond(settingsRef.current.speed)
           offsetRef.current += pps * dt
         }
@@ -301,7 +320,7 @@ export default function Prompter({
     return () => window.removeEventListener('keydown', onKey)
   }, [togglePlay, restart, onClose, onSettingsChange, showControls])
 
-  // Fullscreen on open, restore on close
+  // Fullscreen on open, auto-start (countdown → scroll), restore on close
   useEffect(() => {
     const el = rootRef.current
     if (el?.requestFullscreen) {
@@ -309,11 +328,16 @@ export default function Prompter({
     }
     hideTimerRef.current = window.setTimeout(() => setControlsVisible(false), 3500)
     track('prompter_start')
+    startPlaying()
     return () => {
+      if (countdownTimerRef.current !== null) {
+        window.clearTimeout(countdownTimerRef.current)
+      }
       if (document.fullscreenElement) {
         void document.exitFullscreen().catch(() => undefined)
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Wheel to seek
@@ -418,7 +442,7 @@ export default function Prompter({
       {/* paused hint */}
       {!playing && countdown === null && (
         <div className="pointer-events-none absolute inset-x-0 bottom-[22vh] z-20 flex justify-center">
-          <span className="rounded-full bg-black/70 px-4 py-1.5 text-sm text-white/80">
+          <span className="rounded-full border border-white/25 bg-neutral-900 px-4 py-1.5 text-sm text-white shadow-lg">
             {progress > 0
               ? 'Paused — tap or press Space to resume'
               : 'Tap or press Space to start'}
