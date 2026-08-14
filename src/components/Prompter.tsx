@@ -513,8 +513,11 @@ export default function Prompter({
       )}
 
       {/* paused hint */}
-      {ready && !playing && countdown === null && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-[22vh] z-20 flex justify-center">
+      <div
+        aria-live="polite"
+        className="pointer-events-none absolute inset-x-0 bottom-[22vh] z-20 flex justify-center"
+      >
+        {ready && !playing && countdown === null && (
           <span className="rounded-full border border-white/25 bg-neutral-900 px-4 py-1.5 text-sm text-white shadow-lg">
             {progress >= 1
               ? touch
@@ -528,13 +531,15 @@ export default function Prompter({
                   ? 'Tap to start'
                   : 'Tap or press Space to start'}
           </span>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* countdown overlay */}
       {countdown !== null && (
         <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/80">
-          <span className="text-[20vh] font-bold tabular-nums">{countdown}</span>
+          <span role="timer" aria-live="polite" className="text-[20vh] font-bold tabular-nums">
+            {countdown}
+          </span>
         </div>
       )}
 
@@ -547,6 +552,7 @@ export default function Prompter({
             : 'pointer-events-none opacity-0'
         }`}
         onPointerDown={(e) => e.stopPropagation()}
+        onFocus={showControls}
       >
         <div className="mx-auto mb-[max(0.75rem,env(safe-area-inset-bottom))] flex w-fit max-w-full flex-wrap items-center justify-center gap-1 rounded-2xl border border-white/15 bg-black/70 px-2 py-1.5 backdrop-blur sm:gap-2 sm:px-3">
           <button
@@ -672,7 +678,10 @@ export default function Prompter({
       </div>
 
       {/* status pills (rendered outside the mirrored transform so they stay readable) */}
-      <div className="pointer-events-none absolute top-3 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-1.5">
+      <div
+        aria-live="polite"
+        className="pointer-events-none absolute top-3 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-1.5"
+      >
         {(settings.mirrorX || settings.mirrorY) && (
           <span className="rounded-full bg-black/70 px-3 py-1 text-xs text-white/80">
             Mirror {settings.mirrorX && settings.mirrorY ? 'H+V' : settings.mirrorX ? 'H' : 'V'} on

@@ -137,6 +137,12 @@ export default function Home() {
 
   return (
     <div id="top" className="flex min-h-svh flex-col">
+      <a
+        href="#editor"
+        className="bg-primary text-primary-foreground sr-only z-50 rounded-lg px-4 py-2 font-semibold focus:not-sr-only focus:absolute focus:top-2 focus:left-2"
+      >
+        Skip to script editor
+      </a>
       <SiteHeader />
 
       <main className="flex-1">
@@ -158,7 +164,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_310px]">
+          <div id="editor" className="mt-10 grid scroll-mt-20 gap-6 lg:grid-cols-[1fr_310px]">
             {/* dark studio editor */}
             <div className="flex min-w-0 flex-col overflow-hidden rounded-3xl bg-neutral-900 shadow-xl ring-1 ring-black/10">
               <div className="flex items-center gap-2 border-b border-white/10 px-5 py-3">
@@ -220,7 +226,10 @@ export default function Home() {
             </div>
 
             {/* control deck */}
-            <aside className="min-w-0 space-y-5 rounded-3xl border bg-white p-5 shadow-sm">
+            <section
+              aria-label="Prompter settings"
+              className="min-w-0 space-y-5 rounded-3xl border bg-white p-5 shadow-sm"
+            >
               <div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="speed" className="font-semibold">
@@ -424,7 +433,7 @@ export default function Home() {
                   </ul>
                 </div>
               )}
-            </aside>
+            </section>
           </div>
         </section>
 
@@ -486,7 +495,9 @@ export default function Home() {
               <table className="w-full min-w-[520px] text-sm">
                 <thead>
                   <tr className="border-b text-left">
-                    <th className="text-muted-foreground px-4 py-3 font-medium" />
+                    <th className="text-muted-foreground px-4 py-3 font-medium">
+                      <span className="sr-only">Feature</span>
+                    </th>
                     <th className="px-4 py-3 font-extrabold">PromptCue</th>
                     <th className="text-muted-foreground px-4 py-3 font-medium">
                       Typical teleprompter apps
