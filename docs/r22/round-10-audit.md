@@ -34,3 +34,13 @@ npm audit：ReDoS(CORS middleware)/memo() 跨请求泄露/Proxy 头透传/Langua
 ## 修复优先级建议
 
 本轮修：J1（WAF 规则，零代码）、J3（npm audit fix）· J2 需老板拍板公开与否，修改员先给出建议方案
+
+---
+
+## 第 10 轮线上复验 verdict（2026-08-14，生产环境实测）
+
+- J1 PASS — 顺序连发 50 次 POST /api/track：第 ~19 次起出现 429，尾段全部 429（Workers Rate Limiting binding 生效；并发首波可短暂穿透，属该 binding 的 per-colo 近似语义，对「防指标污染」目标足够）。WAF 方案因 token 无 zone 权限不可行，改用 Worker 层 binding 是合理等价物，认可。
+- J2 PASS — /api/stats 无 key 与错 key 均 404（fail-closed）；公开与否留老板拍板、回退 3 行，处置得当。
+- J3 PASS — origin/main 依赖 `npm audit` = 0 vulnerabilities。
+
+结论：3/3 PASS，第 10 轮关闭。遗留：H2 其余 6 页扩充、AE cron rollup 首跑确认（03:17 UTC）、AE_SQL_TOKEN/zone 权限 token 事项（需老板）。
