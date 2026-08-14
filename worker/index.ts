@@ -4,8 +4,10 @@ interface Env {
   KV: KVNamespace
   ASSETS: Fetcher
   AE: AnalyticsEngineDataset
+  TRACK_RL: RateLimit
   ACCOUNT_ID: string
   AE_SQL_TOKEN: string
+  STATS_KEY?: string
 }
 
 /** Whitelisted anonymous counter events. No PII, no script content ever sent. */
@@ -100,6 +102,9 @@ app.use('*', async (c, next) => {
 app.get('/api/health', (c) => c.json({ ok: true }))
 
 app.post('/api/track', async (c) => {
+  const ip = c.req.header('cf-connecting-ip') ?? 'unknown'
+  const { success } = await c.env.TRACK_RL.limit({ key: ip })
+  if (!success) return c.json({ error: 'rate limited' }, 429)
   const body = await c.req
     .json<{ event?: string; slug?: string }>()
     .catch(() => ({ event: undefined, slug: undefined }))
@@ -114,6 +119,10 @@ app.post('/api/track', async (c) => {
 })
 
 app.get('/api/stats', async (c) => {
+  // Internal metrics — not public. Requires ?key=<STATS_KEY> (wrangler secret).
+  if (!c.env.STATS_KEY || c.req.query('key') !== c.env.STATS_KEY) {
+    return c.json({ error: 'not found' }, 404)
+  }
   const events = [...EVENTS]
   const [values, slugList, rollupTs] = await Promise.all([
     Promise.all(events.map((e) => c.env.KV.get(`count:${e}:total`))),

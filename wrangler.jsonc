@@ -18,6 +18,17 @@
     // Atomic anonymous event ingestion (replaces racy KV read-modify-write).
     { "binding": "AE", "dataset": "prompter_events" }
   ],
+  "unsafe": {
+    "bindings": [
+      // Workers Rate Limiting API: per-IP cap on /api/track writes.
+      {
+        "name": "TRACK_RL",
+        "type": "ratelimit",
+        "namespace_id": "1001",
+        "simple": { "limit": 30, "period": 60 }
+      }
+    ]
+  },
   "triggers": {
     // Daily rollup of AE counts into KV all-time totals (AE retains ~90 days).
     "crons": ["17 3 * * *"]
