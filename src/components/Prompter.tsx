@@ -642,7 +642,7 @@ export default function Prompter({
               if (!settings.mirrorX) track('mirror_on')
               onSettingsChange({ ...settings, mirrorX: !settings.mirrorX })
             }}
-            aria-label="Mirror horizontally"
+            aria-label="Mirror H (horizontal)"
           >
             <FlipHorizontal2 className="size-5" />
           </button>
@@ -652,7 +652,7 @@ export default function Prompter({
               if (!settings.mirrorY) track('mirror_on')
               onSettingsChange({ ...settings, mirrorY: !settings.mirrorY })
             }}
-            aria-label="Mirror vertically"
+            aria-label="Mirror V (vertical)"
           >
             <FlipVertical2 className="size-5" />
           </button>
@@ -670,8 +670,14 @@ export default function Prompter({
         </p>
       </div>
 
-      {/* voice status */}
-      <div className="pointer-events-none absolute top-3 left-1/2 z-30 -translate-x-1/2">
+      {/* status pills (rendered outside the mirrored transform so they stay readable) */}
+      <div className="pointer-events-none absolute top-3 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-1.5">
+        {(settings.mirrorX || settings.mirrorY) && (
+          <span className="rounded-full bg-black/70 px-3 py-1 text-xs text-white/80">
+            Mirror {settings.mirrorX && settings.mirrorY ? 'H+V' : settings.mirrorX ? 'H' : 'V'} on
+            {touch ? ' \u2014 tap \u21c4 to turn off' : ' \u2014 press M/V to toggle'}
+          </span>
+        )}
         {voiceActive && playing && (
           <span className="flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1 text-xs text-white/80">
             <Mic className="text-primary size-3.5 animate-pulse" /> Voice follow —

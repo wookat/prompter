@@ -51,7 +51,7 @@ export default function UseCase() {
 
         <Button asChild size="lg" className="mt-8 font-bold shadow-md">
           <Link to="/">
-            Open the free teleprompter <ArrowRight />
+            Start prompting — it&rsquo;s free <ArrowRight />
           </Link>
         </Button>
 

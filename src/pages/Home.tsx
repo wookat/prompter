@@ -75,7 +75,7 @@ const FAQ = [
   },
   {
     q: 'What keyboard shortcuts are there?',
-    a: 'Space plays and pauses. Up/Down arrows change speed. Left/Right arrows change text size. M toggles horizontal mirror, V vertical. R restarts. Esc exits.',
+    a: 'Space plays and pauses. Up/Down arrows change speed. Left/Right arrows change text size. M toggles Mirror H (horizontal), V toggles Mirror V (vertical). R restarts. Esc exits.',
   },
   {
     q: 'How do I estimate how long my script takes to read?',
@@ -152,7 +152,7 @@ const COMPARISON: { label: string; us: string | boolean; them: string | boolean 
   { label: 'Watermark on output', us: false, them: 'Often on free plan' },
   { label: 'Script privacy', us: 'Never leaves your device', them: 'Uploaded to cloud' },
   { label: 'Word / script limit', us: 'Unlimited', them: 'Limited on free plan' },
-  { label: 'Mirror & flip modes', us: true, them: true },
+  { label: 'Mirror modes (H & V)', us: true, them: true },
   { label: 'Voice-follow scrolling', us: true, them: 'Paid feature' },
   { label: 'Countdown + eye-line guide', us: true, them: 'Varies' },
   { label: 'Works without install', us: true, them: 'App download required' },
@@ -336,6 +336,8 @@ export default function Home() {
                   Autosaved locally — nothing is uploaded · Need a script?{' '}
                   <a
                     href="https://speech.zalize.com"
+                    target="_blank"
+                    rel="noopener"
                     className="underline hover:text-white/70"
                   >
                     Try SpeakEasy
@@ -421,7 +423,7 @@ export default function Home() {
                     updateSettings({ ...settings, mirrorX: !settings.mirrorX })
                   }}
                 >
-                  <FlipHorizontal2 /> Mirror
+                  <FlipHorizontal2 /> Mirror H
                 </Button>
                 <Button
                   type="button"
@@ -431,7 +433,7 @@ export default function Home() {
                     updateSettings({ ...settings, mirrorY: !settings.mirrorY })
                   }
                 >
-                  <FlipVertical2 /> Flip
+                  <FlipVertical2 /> Mirror V
                 </Button>
                 <Button
                   type="button"
