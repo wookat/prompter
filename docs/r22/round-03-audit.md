@@ -31,3 +31,15 @@
 ## 修复优先级建议
 
 本轮修：C1、C2（至少 ①②）· 建议带上：C3、遗留 B5 · 下轮或挂账：C2③、C4/A5、A10、A11
+
+---
+
+## Verdict（线上复验 2026-08-14，bundle index-TOgINB0e.js）
+
+- **C1: PASS** — `/assets/index-TOgINB0e.js` 返回 `cache-control: public, max-age=31536000, immutable`。
+- **C2①②: PASS** — 首页与 pSEO 页均含 fonts preconnect ×2 + `media="print"` 非阻塞字体加载，阻塞 @import 已移除。复测 Lighthouse mobile：FCP 2.1→2.0s，perf 仍 0.83 —— 剩余瓶颈即挂账的 C2③（SPA 空壳 + CLS 0.287），符合预期，下轮跟踪。
+- **C3: PASS** — 主 bundle 99.7KB gzip（原 103KB），grep 无 pSEO 长文案；/teleprompter-for-podcast 按需加载独立 chunk 且正常渲染。
+- **B5: PASS** — 超长首行在完整词边界截断并加「…」（实测标题 'alpha … india…'）。
+- C4：按共识与 A5 合并挂账，不判分。
+
+结论：4/4 PASS。挂账：C2③（首页预渲染/CLS）、A5+C4、A10、A11。
