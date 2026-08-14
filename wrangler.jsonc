@@ -11,9 +11,20 @@
     "not_found_handling": "404-page"
   },
   "kv_namespaces": [
-    // Anonymous usage counters (page views / prompter starts). No PII.
+    // All-time counter totals (rolled up from AE by cron) + legacy counts. No PII.
     { "binding": "KV", "id": "55d76149296445cebc18a420e6adc200" }
   ],
+  "analytics_engine_datasets": [
+    // Atomic anonymous event ingestion (replaces racy KV read-modify-write).
+    { "binding": "AE", "dataset": "prompter_events" }
+  ],
+  "triggers": {
+    // Daily rollup of AE counts into KV all-time totals (AE retains ~90 days).
+    "crons": ["17 3 * * *"]
+  },
+  "vars": {
+    "ACCOUNT_ID": "ddff52d24ee44e21a021c15eaffcc86d"
+  },
   "observability": {
     "enabled": true
   }

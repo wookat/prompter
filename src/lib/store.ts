@@ -108,6 +108,28 @@ export function saveScripts(list: SavedScript[]): boolean {
   }
 }
 
+/**
+ * Build the saved-scripts list after saving `text`: titles from the first
+ * line (word-boundary truncated), dedupes by content, newest first, max 50.
+ */
+export function upsertScript(scripts: SavedScript[], text: string): SavedScript[] {
+  const firstLine = text.trim().split('\n')[0].trim()
+  const title =
+    firstLine.length <= 60
+      ? firstLine || 'Untitled script'
+      : `${(firstLine.slice(0, 60).replace(/\s+\S*$/, '') || firstLine.slice(0, 59)).trimEnd()}…`
+  const existing = scripts.find((s) => s.text === text)
+  return existing
+    ? [
+        { ...existing, title, updatedAt: Date.now() },
+        ...scripts.filter((s) => s.id !== existing.id),
+      ]
+    : [{ id: crypto.randomUUID(), title, text, updatedAt: Date.now() }, ...scripts].slice(
+        0,
+        50,
+      )
+}
+
 export function loadCurrentText(): string {
   try {
     return localStorage.getItem(CURRENT_KEY) ?? ''
@@ -127,8 +149,13 @@ export function saveCurrentText(text: string): void {
 /** Baseline speaking pace for CJK text, in characters per minute. */
 export const CJK_CPM = 260
 
-const CJK_CHAR =
+/** Single definition of "what counts as a CJK character" for pacing,
+ * counting and voice tokenization (kana, CJK ideographs incl. ext. A,
+ * compatibility ideographs, half-width katakana). */
+export const CJK_CHAR =
   /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]/
+
+const CJK_CHAR_G = new RegExp(CJK_CHAR.source, 'g')
 
 let segmenter: Intl.Segmenter | null | undefined
 
@@ -161,9 +188,9 @@ function countUnits(text: string): { words: number; cjkChars: number } {
     }
     return { words, cjkChars }
   }
-  const cjkChars = (text.match(/[\u4e00-\u9fff]/g) ?? []).length
+  const cjkChars = (text.match(CJK_CHAR_G) ?? []).length
   const words = (
-    text.replace(/[\u4e00-\u9fff]/g, ' ').match(/[A-Za-z0-9''-]+/g) ?? []
+    text.replace(CJK_CHAR_G, ' ').match(/[A-Za-z0-9''-]+/g) ?? []
   ).length
   return { words, cjkChars }
 }

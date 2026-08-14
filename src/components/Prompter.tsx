@@ -403,7 +403,8 @@ export default function Prompter({
   useEffect(() => {
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
-      offsetRef.current += e.deltaY
+      // DOM_DELTA_LINE (Firefox) reports lines, not pixels.
+      offsetRef.current += e.deltaMode === 1 ? e.deltaY * 40 : e.deltaY
       applyOffset()
       showControls()
     }

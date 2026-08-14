@@ -4,6 +4,10 @@
  * sent to our servers.
  */
 
+import { CJK_CHAR } from '@/lib/store'
+
+const CJK_CHAR_G = new RegExp(CJK_CHAR.source, 'g')
+
 interface SpeechRecognitionAlternativeLike {
   transcript: string
 }
@@ -57,9 +61,9 @@ export function normalizeWord(w: string): string {
 export function tokenizeSpeech(transcript: string): string[] {
   const out: string[] = []
   for (const chunk of transcript.split(/\s+/)) {
-    const cjk = chunk.match(/[\u4e00-\u9fff]/g)
+    const cjk = chunk.match(CJK_CHAR_G)
     if (cjk) out.push(...cjk)
-    const latin = normalizeWord(chunk.replace(/[\u4e00-\u9fff]/g, ''))
+    const latin = normalizeWord(chunk.replace(CJK_CHAR_G, ''))
     if (latin) out.push(latin)
   }
   return out
