@@ -35,3 +35,14 @@
 ## 修复优先级建议
 
 本轮修：H1（本轮核心，验收 curl 有正文 + CLS<0.1）、H3、H4 · H2 建议至少先做 2 个页面试点（婚礼+视频录制），其余 6 页可下轮跟进
+
+---
+
+## 第 8 轮线上复验 verdict（2026-08-14，生产环境实测，bundle index-CM-fgx2D.js）
+
+- H1 PASS（C2③ 关闭）— curl 首页预渲染正文 1161 词（原 0），FAQ 文本爬虫可见；Lighthouse 实测 CLS = 0（原 0.287）、perf 0.83→0.96、FCP 1.8s；回访用户草稿接管正确、console 零错误、接管后提词器正常滚动。renderToString 单一事实来源方案优于我提的字符串模板，认可。
+- H2 PASS（试点 2 页）— wedding-speech 747 词 / video-recording 749 词，均含 FAQPage schema；未扩充页（podcast 308 词、无 FAQPage）符合预期。剩余 6 页挂账下轮。
+- H3 PASS — 静态 404 页 CTA 已为 "Start prompting — it's free"，三处共用常量。
+- H4 PASS（机制验证）— lastmod 改取内容源文件 git 日期；今日仍为 2026-08-14 属正确（内容源今日有提交），机制上后续空部署不再刷新。
+
+结论：4/4 PASS，第 8 轮关闭，C2③ 正式关闭。遗留：H2 其余 6 页扩充、cron rollup 首跑确认（明日 03:17 UTC）、AE_SQL_TOKEN 换专用只读 token（需老板）。
