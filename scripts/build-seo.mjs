@@ -22,8 +22,8 @@ const esc = (s) =>
     .replaceAll('"', '&quot;')
 
 const assets = readdirSync(path.join(OUT_DIR, 'assets'))
-const jsFile = assets.find((f) => f.endsWith('.js'))
-const cssFile = assets.find((f) => f.endsWith('.css'))
+const jsFile = assets.find((f) => f.startsWith('index-') && f.endsWith('.js'))
+const cssFile = assets.find((f) => f.startsWith('index-') && f.endsWith('.css'))
 
 function pageHtml(u) {
   const url = `${SITE}${u.path}`
@@ -51,6 +51,10 @@ function pageHtml(u) {
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" /></noscript>
     <title>${esc(u.title)}</title>
     <meta name="description" content="${esc(u.description)}" />
     <link rel="canonical" href="${url}" />

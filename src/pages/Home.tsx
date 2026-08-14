@@ -41,7 +41,7 @@ import {
   speedToWpm,
 } from '@/lib/store'
 import { track } from '@/lib/track'
-import { USE_CASES } from '@/lib/useCases'
+import { USE_CASE_LINKS } from '@/lib/useCaseLinks'
 import { voiceSupported } from '@/lib/voice'
 
 const SAMPLE = `Welcome to PromptCue, your free online teleprompter.
@@ -231,11 +231,11 @@ export default function Home() {
 
   const saveScript = () => {
     if (!text.trim()) return
+    const firstLine = text.trim().split('\n')[0].trim()
     const title =
-      text
-        .trim()
-        .split('\n')[0]
-        .slice(0, 60) || 'Untitled script'
+      firstLine.length <= 60
+        ? firstLine || 'Untitled script'
+        : `${(firstLine.slice(0, 60).replace(/\s+\S*$/, '') || firstLine.slice(0, 59)).trimEnd()}…`
     const existing = scripts.find((s) => s.text === text)
     const next: SavedScript[] = existing
       ? [
@@ -657,7 +657,7 @@ export default function Home() {
             Guides for getting the most out of a browser teleprompter in your situation.
           </p>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {USE_CASES.map((u) => (
+            {USE_CASE_LINKS.map((u) => (
               <Link
                 key={u.slug}
                 to={u.path}
@@ -665,7 +665,7 @@ export default function Home() {
               >
                 <h3 className="text-sm font-bold">{u.name}</h3>
                 <p className="text-muted-foreground mt-1.5 line-clamp-3 text-xs leading-relaxed">
-                  {u.intro}
+                  {u.blurb}
                 </p>
               </Link>
             ))}
