@@ -19,6 +19,7 @@ const EVENTS = new Set([
   'script_import',
   'mirror_on',
   'voice_on',
+  'record_on',
   'usecase_view',
 ])
 
@@ -91,7 +92,7 @@ const SECURITY_HEADERS: Record<string, string> = {
   'x-frame-options': 'DENY',
   'x-content-type-options': 'nosniff',
   'referrer-policy': 'strict-origin-when-cross-origin',
-  'permissions-policy': 'camera=(), geolocation=(), payment=()',
+  'permissions-policy': 'camera=(self), microphone=(self), geolocation=(), payment=()',
 }
 
 app.use('*', async (c, next) => {
@@ -116,6 +117,21 @@ app.post('/api/track', async (c) => {
       : ''
   c.env.AE.writeDataPoint({ blobs: [event, slug], indexes: [event] })
   return c.json({ ok: true })
+})
+
+app.get('/api/pulse', async (c) => {
+  // Public, anonymous aggregate: total teleprompter sessions started.
+  const [kvTotal, rollupTs] = await Promise.all([
+    c.env.KV.get('count:prompter_start:total'),
+    c.env.KV.get(ROLLUP_KEY),
+  ])
+  let starts = Number(kvTotal ?? '0')
+  const live = await aeCounts(c.env, rollupTs ?? AE_EPOCH).catch(() => [])
+  for (const row of live) {
+    if (row.event === 'prompter_start') starts += row.n
+  }
+  c.header('cache-control', 'public, max-age=300')
+  return c.json({ starts })
 })
 
 app.get('/api/stats', async (c) => {

@@ -1,0 +1,29 @@
+你是一名独立的产品设计评审（不属于任何一家参评公司，也不知道这些产品分别属于谁）。请对三个在线提词器（teleprompter）产品 A、B、C 做匿名盲评。材料已匿名化（品牌/logo/域名已遮盖）。不要试图猜测或识别产品身份，只按材料客观评分。
+
+材料（截图链接）：
+A 首页桌面 1440：https://app.devin.ai/attachments/bf6e4c0d-9064-423e-8ca6-49de294e683f/A-home-desktop.png
+A 首页移动 375：https://app.devin.ai/attachments/78a3ead0-d19e-43c0-9b5f-aa148dc5dcdf/A-home-mobile.png
+A 提词工作流桌面：https://app.devin.ai/attachments/42553518-b1d2-4ac5-9e1c-bff7dbd6c15c/A-flow-desktop.png
+A 提词工作流移动：https://app.devin.ai/attachments/76c8af00-72d2-419e-9564-786dccce9e61/A-flow-mobile.png
+B 首页桌面 1440：https://app.devin.ai/attachments/7146b397-5dcd-4ddf-bd92-ae83cf3b1c18/B-home-desktop.png
+B 首页移动 375：https://app.devin.ai/attachments/179249e2-5de2-4d7c-a1ea-a36fe3cdfc01/B-home-mobile.png
+B 提词工作流桌面：https://app.devin.ai/attachments/6de1d2c7-4740-4956-941c-54fa1c69204a/B-flow-desktop.png
+B 提词工作流移动：https://app.devin.ai/attachments/063beb4c-843a-41af-b667-4e7355e1b319/B-flow-mobile.png
+C 首页桌面 1440：https://app.devin.ai/attachments/523bb028-f209-46ce-917b-eaa0e33f2c95/C-home-desktop.png
+C 首页移动 375：https://app.devin.ai/attachments/c09da3c4-7dbd-455a-aed7-ea6656203d8f/C-home-mobile.png
+备注：C 的提词工作流页在登录墙之后（其 web 产品需注册），故无工作流截图；请依据其首页展示的产品信息评估其工作流维度，并注明「依据有限」。
+
+性能实测数据（同一浏览器/网络环境实测首页，数值越小越好；transferKB 可能受缓存影响仅供参考）：
+A: TTFB 8ms, DCL 52ms, load 74ms, 请求数 15
+B: TTFB 31ms, DCL 137ms, load 147ms, 请求数 5
+C: TTFB 60ms, DCL 331ms, load 754ms, 请求数 47
+
+评审任务：按以下六个维度分别给 A、B、C 打分（每维 1-10 分），每个分数必须附具体理由（引用截图中的具体细节），并判定每维谁胜（可并列）：
+1. 视觉设计（配色、排版、层次、现代感）
+2. 信息层级（首屏信息组织、扫描效率、重点是否突出）
+3. 交互与流程顺滑度（从落地到开始提词需要几步、控件可发现性、工作流界面可用性）
+4. 功能完整度（可见功能：速度/字号/镜像/倒计时/语音跟随/导入/录制等）
+5. 性能实测（用上面的实测数据）
+6. 文案与信任感（文案清晰度、专业感、隐私承诺、可信度信号）
+
+输出格式：一个 markdown 报告，含六维评分表（A/B/C 三列）、每维逐项理由、每维胜者、总分与总排名、以及每个产品最应改进的 top3。把完整报告用 message_user 发回（报告直接写在消息里或作为附件）。不需要访问任何网站，只依据给定材料。完成即结束。

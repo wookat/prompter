@@ -13,6 +13,7 @@ import {
   Save,
   ScrollText,
   Upload,
+  Video,
   Zap,
   type LucideIcon,
 } from 'lucide-react'
@@ -45,6 +46,10 @@ export const FAQ: { q: string; a: string }[] = [
   {
     q: 'How does voice follow work?',
     a: 'Turn on Voice follow and the scroll tracks your reading: the text advances as you speak and waits when you pause. Speech recognition runs entirely in your browser (Chrome, Edge and Safari) — no audio is recorded or uploaded.',
+  },
+  {
+    q: 'Can I record myself while reading?',
+    a: 'Yes. Inside the prompter, tap the camera button to record video and audio while you read. The recording is saved directly to your device when you stop — it is never uploaded and has no watermark.',
   },
   {
     q: 'What keyboard shortcuts are there?',
@@ -93,6 +98,11 @@ export const FEATURES: { icon: LucideIcon; title: string; text: string }[] = [
     text: 'The scroll tracks your reading — speak and the text advances, pause and it waits. Recognition runs in your browser; no audio is uploaded.',
   },
   {
+    icon: Video,
+    title: 'Record yourself',
+    text: 'Capture camera and mic while you read — the take saves straight to your device. Nothing is uploaded, no watermark.',
+  },
+  {
     icon: Upload,
     title: 'Import your script',
     text: 'Bring a .txt or .md file straight from your notes app — read locally in your browser, never uploaded.',
@@ -127,6 +137,7 @@ export const COMPARISON: { label: string; us: string | boolean; them: string | b
   { label: 'Word / script limit', us: 'Unlimited', them: 'Limited on free plan' },
   { label: 'Mirror modes (H & V)', us: true, them: true },
   { label: 'Voice-follow scrolling', us: true, them: 'Paid feature' },
+  { label: 'Camera recording (local, private)', us: true, them: 'Cloud upload or paid' },
   { label: 'Countdown + eye-line guide', us: true, them: 'Varies' },
   { label: 'Works without install', us: true, them: 'App download required' },
 ]

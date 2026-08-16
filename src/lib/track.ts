@@ -6,6 +6,7 @@ export type TrackEvent =
   | 'script_import'
   | 'mirror_on'
   | 'voice_on'
+  | 'record_on'
   | 'usecase_view'
 
 export function track(event: TrackEvent, slug?: string): void {
