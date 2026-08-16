@@ -59,7 +59,10 @@
 ## 5. 验证
 
 - 本地：`npm run lint` 0 错误（仅 1 条既有 button.tsx fast-refresh 警告）；`npm run build`（含 tsc）通过。
-- PR / 部署 / 线上 375+1440 复测：见本文件后续更新与 PR 链接。
+- PR：[#20](https://github.com/wookat/prompter/pull/20)（已合并）+ [#21](https://github.com/wookat/prompter/pull/21)（`public/_headers` 覆盖了 worker 的 Permissions-Policy 导致线上摄像头被禁；一行修复，已合并）。
+- 部署：Cloudflare Workers，Version `78f030ca`，https://prompter.zalize.com 。
+- 线上复测（E2E，含录屏，见 PR #20 评论）：录制按钮→授权→红点提示+自视预览→停止即下载 .mp4（本地+线上均通过）；375px 编辑器无裁切/无双滚动；1440px 布局完好；`/api/pulse` 返回 `{"starts":61}`（<500，社会证明行正确不显示）；Permissions-Policy 线上已为 `camera=(self), microphone=(self)`。
+- 遗留（非本轮回归）：dev 模式 StrictMode 下倒计时卡在 3（生产无此问题）；控制栏靠滚轮/按键/点按唤出而非鼠标移动。R2 处理。
 
 ## 6. 下一轮
 
