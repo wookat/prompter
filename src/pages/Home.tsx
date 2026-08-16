@@ -48,6 +48,7 @@ export default function Home() {
   const [running, setRunning] = useState(false)
   const [saved, setSaved] = useState(false)
   const [editorError, setEditorError] = useState<string | null>(null)
+  const [starts, setStarts] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const savedTimerRef = useRef<number | null>(null)
   const editorErrorTimerRef = useRef<number | null>(null)
@@ -98,6 +99,16 @@ export default function Home() {
 
   useEffect(() => {
     track('page_view')
+  }, [])
+
+  useEffect(() => {
+    // Live anonymous aggregate — real usage, shown only once meaningful.
+    fetch('/api/pulse')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { starts?: number } | null) => {
+        if (d && typeof d.starts === 'number' && d.starts >= 500) setStarts(d.starts)
+      })
+      .catch(() => undefined)
   }, [])
 
   useEffect(() => {
@@ -162,6 +173,14 @@ export default function Home() {
               script, press Start, and read at your own pace — your script never leaves
               your device.
             </p>
+            {starts !== null && (
+              <p className="text-muted-foreground mt-3 text-sm">
+                <span className="text-foreground font-semibold tabular-nums">
+                  {(Math.floor(starts / 100) * 100).toLocaleString()}+
+                </span>{' '}
+                teleprompter sessions started here — live count, no account needed
+              </p>
+            )}
           </div>
 
           <div id="editor" className="mt-10 grid scroll-mt-20 gap-6 lg:grid-cols-[1fr_310px]">
@@ -171,10 +190,10 @@ export default function Home() {
                 <span className="size-2.5 rounded-full bg-red-400/80" aria-hidden />
                 <span className="size-2.5 rounded-full bg-amber-400/80" aria-hidden />
                 <span className="size-2.5 rounded-full bg-emerald-400/80" aria-hidden />
-                <span className="ml-2 text-xs font-medium tracking-wide text-white/50">
+                <span className="ml-2 text-xs font-medium tracking-wide whitespace-nowrap text-white/50 max-sm:hidden">
                   Your script
                 </span>
-                <span className="ml-auto text-xs text-white/50 tabular-nums">
+                <span className="ml-auto text-xs whitespace-nowrap text-white/50 tabular-nums">
                   {words} words · ≈ {formatDuration(seconds)} spoken
                 </span>
                 <input
@@ -207,7 +226,7 @@ export default function Home() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Type or paste your script here…"
-                className="min-h-72 w-full min-w-0 flex-1 resize-y bg-transparent px-5 py-4 text-base leading-relaxed text-white outline-none placeholder:text-white/40 sm:min-h-96 sm:text-lg"
+                className="min-h-56 w-full min-w-0 flex-1 bg-transparent px-5 py-4 text-base leading-relaxed text-white outline-none placeholder:text-white/40 max-sm:resize-none sm:min-h-96 sm:resize-y sm:text-lg"
               />
               <div className="flex items-center justify-between border-t border-white/10 px-5 py-2.5 text-xs text-white/40">
                 <span>

@@ -12,6 +12,8 @@ import {
   Play,
   Plus,
   RotateCcw,
+  Video,
+  VideoOff,
   X,
 } from 'lucide-react'
 import { track } from '@/lib/track'
@@ -29,6 +31,7 @@ import {
   tokenizeSpeech,
   voiceSupported,
 } from '@/lib/voice'
+import { recordingSupported, useRecorder } from '@/lib/recorder'
 
 interface PrompterProps {
   text: string
@@ -80,6 +83,7 @@ export default function Prompter({
   const [ready, setReady] = useState(() => text.length < LARGE_TEXT_CHARS)
 
   const touch = useMemo(() => coarsePointer(), [])
+  const { state: recState, toggle: recToggle, attachPreview: recPreview } = useRecorder()
   const voiceActive = settings.voice && voiceSupported() && !voiceError
   const estSecs = useMemo(() => estimateSeconds(text), [text])
   const estSecsRef = useRef(estSecs)
@@ -624,6 +628,25 @@ export default function Prompter({
             <Plus className="size-5" />
           </button>
           <span className="mx-1 h-6 w-px bg-white/15" />
+          {recordingSupported() && (
+            <button
+              className={`rounded-xl p-2.5 hover:bg-white/10 ${recState === 'recording' ? 'text-red-400' : ''}`}
+              onClick={() => {
+                if (recState !== 'recording') track('record_on')
+                recToggle()
+              }}
+              aria-label={
+                recState === 'recording' ? 'Stop recording' : 'Record yourself'
+              }
+              title="Record camera + mic while you read — the take saves to your device, nothing is uploaded"
+            >
+              {recState === 'recording' ? (
+                <Video className="size-5" />
+              ) : (
+                <VideoOff className="size-5" />
+              )}
+            </button>
+          )}
           {voiceSupported() && (
             <button
               className={`rounded-xl p-2.5 hover:bg-white/10 ${settings.voice && !voiceError ? 'text-primary' : ''}`}
@@ -699,7 +722,28 @@ export default function Prompter({
             Microphone unavailable — using timed scroll
           </span>
         )}
+        {recState === 'recording' && (
+          <span className="flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1 text-xs text-white/80">
+            <span className="size-2 animate-pulse rounded-full bg-red-500" aria-hidden />
+            Recording — saves to your device when you stop
+          </span>
+        )}
+        {recState === 'error' && (
+          <span className="rounded-full bg-black/70 px-3 py-1 text-xs text-amber-300">
+            Camera unavailable — check permissions to record
+          </span>
+        )}
       </div>
+
+      {/* camera self-view while recording */}
+      {(recState === 'recording' || recState === 'starting') && (
+        <video
+          ref={recPreview}
+          muted
+          playsInline
+          className="absolute right-3 bottom-20 z-30 w-36 rounded-xl border border-white/20 shadow-lg sm:w-44"
+        />
+      )}
     </div>
   )
 }
