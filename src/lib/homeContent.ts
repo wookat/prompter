@@ -32,6 +32,10 @@ export const FAQ: { q: string; a: string }[] = [
     a: 'Yes — 100% free for personal and commercial use. No account, no watermark, no word limit, no paid tier hiding the useful features.',
   },
   {
+    q: 'How can it stay free forever?',
+    a: 'PromptCue is cheap to run by design: your script and recordings stay on your device, so there are no storage or processing costs to pass on. It runs on low-cost edge hosting funded by its maker\u2019s other projects — no ads, no data selling.',
+  },
+  {
     q: 'Is my script uploaded anywhere?',
     a: 'No. Your script lives only in your browser\u2019s local storage. Nothing you type or paste is ever sent to a server.',
   },
