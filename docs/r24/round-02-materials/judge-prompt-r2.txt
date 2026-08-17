@@ -1,0 +1,36 @@
+你是一名独立的产品/UI 评审。以下是 3 个匿名在线提词器（teleprompter）产品的截图与性能实测数据，标记为 A、B、C。你不知道也不需要知道它们是谁做的。请公正打分。
+
+材料说明（logo/品牌字样已用灰块遮蔽，勿猜测品牌）：
+- A：首页 desktop 1440 / mobile 375；产品详情页 desktop/mobile（A 的核心工作流在登录墙后，无法公开截图，功能完整度可参考其详情页展示的功能与截图，但请在理由中注明证据受限）
+  https://app.devin.ai/attachments/72e95e58-79b1-4d21-99c5-f13a4dd3ea29/A-home-desktop.png
+  https://app.devin.ai/attachments/26bf6f08-f7d4-4459-b9b4-3843274b31c9/A-home-mobile.png
+  https://app.devin.ai/attachments/8228083f-e227-45f8-8ed3-ed08cb6a38be/A-guide-desktop.png
+  https://app.devin.ai/attachments/255fefc4-7bb1-4f47-b472-60cd6e5777b5/A-guide-mobile.png
+- B：首页 desktop/mobile；核心工作流（滚动提词界面）desktop/mobile
+  https://app.devin.ai/attachments/98ebadc5-16b2-4150-9965-3fc453542696/B-home-desktop.png
+  https://app.devin.ai/attachments/a42297ad-608a-470e-bfda-6e803ce99b94/B-home-mobile.png
+  https://app.devin.ai/attachments/7f59db19-d7b7-4a0a-91a7-5f239503c316/B-flow-desktop.png
+  https://app.devin.ai/attachments/51ea112a-a0ec-40ea-a58d-fe1ab8c554df/B-flow-mobile.png
+- C：首页 desktop/mobile；核心工作流（滚动提词+控制栏）desktop/mobile；录制模式（摄像头自视+录制状态）desktop/mobile
+  https://app.devin.ai/attachments/780561b8-c266-487a-8136-6946e1533bfb/C-home-desktop.png
+  https://app.devin.ai/attachments/91dceeab-2960-4abd-b820-353fc39ef013/C-home-mobile.png
+  https://app.devin.ai/attachments/48a87546-4942-4969-a7a3-4e1e419325e6/C-flow-desktop.png
+  https://app.devin.ai/attachments/a88af9b7-51e9-4340-bc36-d80a604badd1/C-flow-mobile.png
+  https://app.devin.ai/attachments/5fbe7f34-77fd-4a20-8e4a-0af791dbddaa/C-record-desktop.png
+  https://app.devin.ai/attachments/42b0fecf-b321-4c4b-b232-a1b63f6ecdb9/C-record-mobile.png
+
+性能实测（同一浏览器环境，navigation timing）：
+| 站点 | TTFB | DOMContentLoaded | Load | 请求数 |
+| A | 280ms | 954ms | 4589ms | 111 |
+| B | 2ms | 103ms | 153ms | 18 |
+| C | 39ms | 108ms | 140ms | 6 |
+
+请按六个维度分别给 A/B/C 打 1-10 分，并给出逐项理由与每维胜者：
+1. 视觉设计（美感、一致性、品牌感）
+2. 信息层级（页面结构、重点是否清晰）
+3. 交互与流程顺滑度（从进入到完成核心任务的路径）
+4. 功能完整度（提词器核心功能：速度/字号/镜像/倒计时/语音跟随/导入/录制等；注意 A 证据受限，按可见证据评）
+5. 性能实测（用上表数据）
+6. 文案与信任感（文案质量、隐私/信任信号）
+
+输出格式：每维一个小节（A/B/C 分数+理由+胜者），最后一个总分表和总体结论（谁整体最好、各自最大短板）。不要试图识别品牌。
