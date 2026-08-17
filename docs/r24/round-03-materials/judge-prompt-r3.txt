@@ -1,0 +1,37 @@
+你是一名独立产品评审。以下是三个匿名在线提词器产品（A/B/C，logo/域名/品牌字样已遮蔽），请仅基于给出的截图与性能数据做盲评。你不知道这些产品分别是什么，也不要猜测品牌。
+
+证据说明：
+- 每个产品含首页截图（1440px 桌面 + 375px 移动端）。
+- A 另有：功能区块截图（桌面+移动）、提词工作流截图（桌面+移动）、录制状态截图（桌面+移动，界面含摄像头自视窗与录制提示）。
+- B 的核心工作流在登录墙后（本评审不绕过），提供其公开指南/详情页截图（桌面+移动）替代；请按公开可见证据评分并在理由中注明证据受限。
+- C 另有提词工作流截图（桌面+移动）。
+
+性能实测（同一浏览器环境、公开首页、同日）：
+| 匿名 | TTFB | DCL | Load | 请求数 |
+|---|---:|---:|---:|---:|
+| A | 40ms | 145ms | 149ms | 7 |
+| B | 286ms | 1051ms | 4434ms | 111 |
+| C | 5ms | 72ms | 163ms | 19 |
+
+截图链接：
+A：
+https://app.devin.ai/attachments/947cbf1a-4868-41a2-a79f-6cf9f2ee10ce/A-home-desktop.png
+https://app.devin.ai/attachments/c73a8604-f127-43d5-b2fe-37f39320d5aa/A-home-mobile.png
+https://app.devin.ai/attachments/52b5c23a-ebc1-413a-8a5c-5aa52289a9dc/A-section-desktop.png
+https://app.devin.ai/attachments/2f5b3aff-188c-4153-885f-fc94308b8781/A-section-mobile.png
+https://app.devin.ai/attachments/0a7ffd18-298e-4025-a9b0-20e2fe2ff020/A-flow-desktop.png
+https://app.devin.ai/attachments/26c5b7a8-6e59-4b99-bd91-0fe0f4809e41/A-flow-mobile.png
+https://app.devin.ai/attachments/2f639ca0-4302-48f5-8b95-fe27f383993d/A-record-desktop.png
+https://app.devin.ai/attachments/065a8b68-2177-4ab6-87e6-6fe6e849de6e/A-record-mobile.png
+B：
+https://app.devin.ai/attachments/212fad28-4efb-427a-a415-6289a81d7547/B-home-desktop.png
+https://app.devin.ai/attachments/cd0af875-2b6d-49c8-aea8-80e166d041cc/B-home-mobile.png
+https://app.devin.ai/attachments/71b11d6d-c6be-415d-a45b-e998d89da3e0/B-guide-desktop.png
+https://app.devin.ai/attachments/8480b192-4832-4d7c-b03f-85d4741edf60/B-guide-mobile.png
+C：
+https://app.devin.ai/attachments/db6e6c37-7ea0-4978-8212-ab67a506278e/C-home-desktop.png
+https://app.devin.ai/attachments/58d832a1-277c-4f93-95cc-579b578b3ca8/C-home-mobile.png
+https://app.devin.ai/attachments/1a760036-849c-4d83-9823-cce187128663/C-flow-desktop.png
+https://app.devin.ai/attachments/0f11be20-bff4-419b-bb6b-94a6f237cb5e/C-flow-mobile.png
+
+评分要求：六个维度（视觉设计、信息层级、交互与流程顺滑度、功能完整度、性能实测、文案与信任感），每维给 A/B/C 各打 1-10 分并给出逐项理由，判每维谁胜。为控制消息截断，请分多条消息输出：消息1=视觉设计，消息2=信息层级，消息3=交互流程，消息4=功能完整度，消息5=性能实测，消息6=文案信任，消息7=总分表（六维合计 markdown 表），消息8=总体结论（每个产品最大优势与最大短板）。每条消息不超过 1200 字符。不要猜测或提及任何品牌名。
