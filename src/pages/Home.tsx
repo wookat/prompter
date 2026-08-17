@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   AlignCenter,
@@ -16,7 +16,6 @@ import {
   X,
 } from 'lucide-react'
 import { SiteFooter, SiteHeader } from '@/components/Layout'
-import Prompter from '@/components/Prompter'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import {
@@ -40,6 +39,9 @@ import { track } from '@/lib/track'
 import { COMPARISON, FAQ, FEATURES, SAMPLE, STEPS } from '@/lib/homeContent'
 import { CTA_START_FREE, USE_CASE_LINKS } from '@/lib/useCaseLinks'
 import { voiceSupported } from '@/lib/voice'
+
+const prompterModule = () => import('@/components/Prompter')
+const Prompter = lazy(prompterModule)
 
 export default function Home() {
   const [text, setText] = useState<string>(() => loadCurrentText() || SAMPLE)
@@ -99,6 +101,8 @@ export default function Home() {
 
   useEffect(() => {
     track('page_view')
+    const t = window.setTimeout(() => void prompterModule(), 2000)
+    return () => window.clearTimeout(t)
   }, [])
 
   useEffect(() => {
@@ -313,7 +317,20 @@ export default function Home() {
                   className="accent-primary mt-1.5 h-8 w-full"
                 />
               </div>
-              <div className="flex flex-wrap gap-2">
+              <Button
+                className="w-full text-base font-bold shadow-md"
+                size="lg"
+                disabled={!text.trim()}
+                onClick={() => setRunning(true)}
+              >
+                <Play /> Start teleprompter
+              </Button>
+
+              <div className="space-y-2 border-t pt-4">
+                <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                  Display
+                </p>
+                <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"
                   variant={settings.mirrorX ? 'default' : 'outline'}
@@ -370,11 +387,8 @@ export default function Home() {
                     <Mic /> Voice
                   </Button>
                 )}
-              </div>
-
-              <div>
-                <Label className="font-semibold">Text color</Label>
-                <div className="mt-1.5 flex gap-2">
+                </div>
+                <div className="flex gap-2">
                   {(Object.keys(TEXT_COLORS) as TextColor[]).map((c) => (
                     <button
                       key={c}
@@ -394,15 +408,6 @@ export default function Home() {
                   ))}
                 </div>
               </div>
-
-              <Button
-                className="w-full text-base font-bold shadow-md"
-                size="lg"
-                disabled={!text.trim()}
-                onClick={() => setRunning(true)}
-              >
-                <Play /> Start teleprompter
-              </Button>
 
               <div className="flex gap-2">
                 <Button
@@ -651,12 +656,14 @@ export default function Home() {
       <SiteFooter />
 
       {running && (
-        <Prompter
-          text={text}
-          settings={settings}
-          onSettingsChange={updateSettings}
-          onClose={() => setRunning(false)}
-        />
+        <Suspense fallback={null}>
+          <Prompter
+            text={text}
+            settings={settings}
+            onSettingsChange={updateSettings}
+            onClose={() => setRunning(false)}
+          />
+        </Suspense>
       )}
     </div>
   )
