@@ -423,10 +423,13 @@ export default function Prompter({
 
   // Touch/pointer: tap toggles play, drag seeks. Taps are ignored right
   // after mount so the click that opened the prompter can't toggle it.
-  const mountedAtRef = useRef(Date.now())
+  const mountedAtRef = useRef(0)
+  useEffect(() => {
+    mountedAtRef.current = Date.now()
+  }, [])
   const onPointerDown = (e: React.PointerEvent) => {
     if ((e.target as HTMLElement).closest('[data-controls]')) return
-    if (Date.now() - mountedAtRef.current < 400) return
+    if (mountedAtRef.current && Date.now() - mountedAtRef.current < 400) return
     dragRef.current = { y: e.clientY, offset: offsetRef.current, moved: false }
   }
   const onPointerMove = (e: React.PointerEvent) => {
