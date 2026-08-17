@@ -459,21 +459,41 @@ export default function Home() {
         {/* how it works */}
         <section id="how-it-works" className="border-t bg-white">
           <div className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 sm:py-20">
-            <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
-              On camera in three steps
-            </h2>
-            <div className="mt-10 grid gap-6 sm:grid-cols-3">
-              {STEPS.map((s, i) => (
-                <div key={s.title} className="rounded-2xl border p-6">
-                  <span className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-xl text-sm font-extrabold">
-                    {i + 1}
-                  </span>
-                  <h3 className="mt-4 text-lg font-bold">{s.title}</h3>
-                  <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed">
-                    {s.text}
-                  </p>
+            <div className="grid items-center gap-10 lg:grid-cols-2">
+              <div className="relative overflow-hidden rounded-3xl shadow-xl ring-1 ring-black/10">
+                <img
+                  src="/media/creator-recording.webp"
+                  alt="A creator reading from a phone teleprompter while recording at her desk"
+                  width={1200}
+                  height={800}
+                  loading="lazy"
+                  decoding="async"
+                  className="block h-auto w-full"
+                />
+                <span className="absolute bottom-3 left-3 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+                  Any camera, any phone — just prop it up and read
+                </span>
+              </div>
+              <div>
+                <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+                  On camera in three steps
+                </h2>
+                <div className="mt-8 space-y-6">
+                  {STEPS.map((s, i) => (
+                    <div key={s.title} className="flex gap-4">
+                      <span className="bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-xl text-sm font-extrabold">
+                        {i + 1}
+                      </span>
+                      <div>
+                        <h3 className="text-lg font-bold">{s.title}</h3>
+                        <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
+                          {s.text}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </section>

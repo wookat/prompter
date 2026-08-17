@@ -401,7 +401,11 @@ export default function Prompter({
       startedRef.current = true
       startPlaying()
     }
-  }, [ready, startPlaying])
+    return () => {
+      startedRef.current = false
+      cancelCountdown()
+    }
+  }, [ready, startPlaying, cancelCountdown])
 
   // Wheel to seek
   useEffect(() => {
@@ -424,7 +428,10 @@ export default function Prompter({
   }
   const onPointerMove = (e: React.PointerEvent) => {
     const d = dragRef.current
-    if (!d) return
+    if (!d) {
+      if (e.pointerType === 'mouse') showControls()
+      return
+    }
     const delta = d.y - e.clientY
     if (Math.abs(delta) > 8) d.moved = true
     if (d.moved) {
