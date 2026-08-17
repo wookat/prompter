@@ -1,0 +1,39 @@
+你是一名独立产品评审。以下是三个匿名在线提词器产品（A/B/C，logo/域名/品牌字样已遮蔽），请仅基于给出的截图与性能数据做盲评。你不知道这些产品分别是什么，也不要猜测品牌。
+
+证据说明：
+- 每个产品含首页截图（1440px 桌面 + 375px 移动端）。
+- A 的核心工作流在登录墙后（本评审不绕过），提供其公开指南/详情页截图（桌面+移动）替代；请按公开可见证据评分并在理由中注明证据受限。
+- B 另有提词工作流截图（桌面+移动）。
+- C 另有：功能区块截图（桌面+移动）、提词工作流截图（桌面+移动）、录制状态截图（桌面+移动，界面含摄像头自视窗与录制提示）。
+
+性能实测（同一浏览器环境、公开首页、同日）：
+| 匿名 | TTFB | DCL | Load | 请求数 |
+|---|---:|---:|---:|---:|
+| A | 279ms | 894ms | 4108ms | 113 |
+| B | 2ms | 73ms | 153ms | 23 |
+| C | 34ms | 136ms | 144ms | 7 |
+
+截图链接：
+A：
+https://app.devin.ai/attachments/cb7cc240-8d09-48fb-86eb-20a7ab37fda4/A-home-desktop.png
+https://app.devin.ai/attachments/400088a5-3a32-41ce-adfd-ba4a6ad3986d/A-home-mobile.png
+https://app.devin.ai/attachments/da4e1bf0-fe24-4a29-83fa-1ea60ef530fd/A-guide-desktop.png
+https://app.devin.ai/attachments/baed85ec-d9e6-4e50-8882-376a4146f382/A-guide-mobile.png
+B：
+https://app.devin.ai/attachments/dbe35b04-25ff-4791-9aee-c26b3509c7bc/B-home-desktop.png
+https://app.devin.ai/attachments/27415de6-fb25-4792-a8d2-198c2df3c849/B-home-mobile.png
+https://app.devin.ai/attachments/440f0fad-df6a-419d-873c-758659b39cc5/B-flow-desktop.png
+https://app.devin.ai/attachments/84847c7c-9b17-48e3-a4dd-7032683961a8/B-flow-mobile.png
+C：
+https://app.devin.ai/attachments/6c618d17-8eaf-437c-a186-ee8a6c8ee787/C-home-desktop.png
+https://app.devin.ai/attachments/bd33dbdb-1313-4461-9c39-cb59506413ec/C-home-mobile.png
+https://app.devin.ai/attachments/8f37becf-54c0-4959-82ec-7109f0e02ab2/C-section-desktop.png
+https://app.devin.ai/attachments/7ae9bff6-633d-47b7-a568-3567cf072075/C-section-mobile.png
+https://app.devin.ai/attachments/33c8bdf6-ae5c-4537-ba37-59052cd65cdb/C-flow-desktop.png
+https://app.devin.ai/attachments/76b62057-692e-4db0-b607-b463ab921918/C-flow-mobile.png
+https://app.devin.ai/attachments/c7c56837-cb23-423a-a270-34815a811196/C-record-desktop.png
+https://app.devin.ai/attachments/eddcafb2-79dc-4566-93bb-1e502ee181d9/C-record-mobile.png
+
+评分要求：六个维度（视觉设计、信息层级、交互与流程顺滑度、功能完整度、性能实测、文案与信任感），每维给 A/B/C 各打 1-10 分并给出逐项理由，判每维谁胜；再给六维合计总分表和总体结论（每个产品最大优势与最大短板）。
+
+输出方式：把完整评审写成一个 markdown 文件，用 upload_attachment 工具上传，然后只回复该附件 URL（不要在消息里贴长文）。不要猜测或提及任何品牌名。
