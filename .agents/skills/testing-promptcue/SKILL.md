@@ -17,3 +17,4 @@ description: How to run and test the PromptCue teleprompter app (wookat/prompter
 - /api/pulse social-proof line on homepage only renders when `starts >= 500`.
 - Since r24 round 3 the Prompter is code-split (`Prompter-*.js` lazy chunk, preloaded ~2s after page load); when asserting on initial-JS size, count only `index-*.js`.
 - The old Start-click leak that cancelled the countdown was fixed in r24 round 3 (PR #25): taps on the prompter background within 400ms of mount are intentionally ignored, so wait >0.5s after entry before testing tap-to-pause.
+- Voice follow works in Chrome for Testing with fake media: enabling the mic button while playing shows the "Voice follow — listening (audio stays in your browser)" pill; the amber "Microphone unavailable" fallback is not triggered by fake devices.
